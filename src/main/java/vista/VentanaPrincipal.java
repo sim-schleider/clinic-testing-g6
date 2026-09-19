@@ -1,0 +1,516 @@
+package vista;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
+import controlador.Controlador;
+import modelo.modeloDominio.personas.asociado.Asociado;
+import persistencia.AsociadoDTO;
+/**
+ * Clase VentanaPrincipal que implementa la interfaz IVistaPrincipal.
+ * Representa la ventana principal de la aplicación con pestañas para la gestión de asociados y simulación.
+ * Contiene formularios para dar de alta y baja asociados, así como una lista para mostrar los asociados existentes.
+ */
+public class VentanaPrincipal extends JFrame implements IVistaPrincipal {
+    private JTabbedPane pestañas;
+    private JPanel altaAsociado;
+    private JTextField Nombre_Alta;
+    private JTextField Apellido_Alta;
+    private JTextField DNI_Alta;
+    private JTextField Ciudad_Alta;
+    private JTextField Calle_Alta;
+    private JTextField Numero_Alta;
+    private JTextField Telefono_Alta;
+    private JPanel bajaAsociado;
+    private JPanel listaAsociado;
+    private JPanel panelPrincipal;
+    private JButton darDeAltaButton;
+    private JTextField DNI_Baja;
+    private JButton darDeBajaButton;
+    private JList<String> listaAsociados;
+    private JButton aceptarConfiguracionButton;
+    private JTextField cantAsociados;
+    private JTextField cantSolicitudes;
+    private JPanel panelConfiguracion;
+
+    private DefaultListModel<String> listaModel;
+
+    /** Constructor de la clase VentanaPrincipal.
+     * <b>post:</b> se crea la ventana principal con todos sus componentes inicializados y estilizados.
+     */
+    public VentanaPrincipal() {
+        inicializarComponentes();
+        setContentPane(panelPrincipal);
+        setTitle("Gestion de Asociados");
+        setSize(1000, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        darDeAltaButton.setActionCommand(DAR_ALTA);
+        darDeBajaButton.setActionCommand(DAR_BAJA);
+        setVisible(true);
+        this.listaModel = new DefaultListModel<>();
+        listaAsociados.setModel(this.listaModel);
+        aplicarEstilos();
+    }
+
+    /**
+     * Método para inicializar los componentes de la interfaz gráfica.
+     * Crea el panel principal, las pestañas y los formularios necesarios.
+     */
+    private void inicializarComponentes() {
+        // Panel principal
+        panelPrincipal = new JPanel(new BorderLayout());
+
+        // Pestañas
+        pestañas = new JTabbedPane();
+        panelPrincipal.add(pestañas, BorderLayout.CENTER);
+
+        // Crear las pestañas
+        crearPestanaGestionAsociados();
+        crearPestanaSimulacion();
+    }
+
+    /**
+     * Método para crear la pestaña de gestión de asociados.
+     * Contiene formularios para dar de alta y baja asociados, así como una lista para mostrar los asociados existentes.
+     */
+    private void crearPestanaGestionAsociados() {
+        // Usar GridLayout con 1 fila y 2 columnas, pero dar más peso a la lista
+        JPanel panelGestion = new JPanel(new GridLayout(1, 2, 10, 10));
+        panelGestion.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Panel izquierdo: Alta y Baja
+        JPanel panelIzquierdo = new JPanel(new GridLayout(2, 1, 10, 10));
+
+        // Panel de Alta Asociado
+        altaAsociado = crearPanelAltaAsociado();
+
+        // Panel de Baja Asociado
+        bajaAsociado = crearPanelBajaAsociado();
+
+        panelIzquierdo.add(altaAsociado);
+        panelIzquierdo.add(bajaAsociado);
+
+        // Panel de Lista Asociados
+        listaAsociado = crearPanelListaAsociados();
+
+        // Organizar en el layout - La lista ocupará más espacio naturalmente
+        panelGestion.add(panelIzquierdo);
+        panelGestion.add(listaAsociado);
+
+        pestañas.addTab("Gestion de Asociados", panelGestion);
+    }
+
+    /**
+     * Método para crear el panel de alta de asociado.
+     * @return El panel de alta de asociado.
+     */
+    private JPanel crearPanelAltaAsociado() {
+        JPanel panel = new JPanel(new GridLayout(8, 1, 5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.black),
+                "Alta Asociado",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION
+        ));
+
+        // Campos del formulario
+        panel.add(crearCampoConEtiqueta("Nombre", Nombre_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("Apellido", Apellido_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("DNI", DNI_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("Ciudad", Ciudad_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("Calle", Calle_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("Numero", Numero_Alta = new JTextField()));
+        panel.add(crearCampoConEtiqueta("Telefono", Telefono_Alta = new JTextField()));
+
+        // Botón Dar de Alta
+        darDeAltaButton = new JButton("Dar de alta");
+        darDeAltaButton.setActionCommand("DAR_ALTA");
+        panel.add(darDeAltaButton);
+
+        return panel;
+    }
+
+    /**
+     * Método para crear el panel de baja de asociado.
+     * @return El panel de baja de asociado.
+     */
+    private JPanel crearPanelBajaAsociado() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.black),
+                "Baja Asociado",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION
+        ));
+        panel.setPreferredSize(new Dimension(200, 100)); // Panel completo más pequeño
+
+        JPanel contenido = new JPanel(new BorderLayout(5, 5));
+        contenido.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
+        // Etiqueta
+        JLabel etiqueta = new JLabel("DNI");
+        etiqueta.setFont(new Font("Segoe UI", Font.BOLD, 12)); // Etiqueta más pequeña
+        contenido.add(etiqueta, BorderLayout.NORTH);
+
+        // Campo DNI MÁS CHICO
+        DNI_Baja = new JTextField(8); // Solo 8 caracteres de ancho
+        DNI_Baja.setPreferredSize(new Dimension(100, 25)); // Compacto
+        contenido.add(DNI_Baja, BorderLayout.CENTER);
+
+        // Botón Dar de Baja más compacto
+        darDeBajaButton = new JButton("Dar de baja");
+        darDeBajaButton.setActionCommand("DAR_BAJA");
+        darDeBajaButton.setFont(new Font("Segoe UI", Font.PLAIN, 12)); // Texto más pequeño
+        darDeBajaButton.setPreferredSize(new Dimension(110, 28));
+        contenido.add(darDeBajaButton, BorderLayout.SOUTH);
+
+        panel.add(contenido, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Método para crear el panel de lista de asociados.
+     * @return El panel de lista de asociados.
+     */
+    private JPanel crearPanelListaAsociados() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.black),
+                "Lista Asociados",
+                TitledBorder.DEFAULT_JUSTIFICATION,
+                TitledBorder.DEFAULT_POSITION
+        ));
+
+        listaAsociados = new JList<>();
+        JScrollPane scrollPane = new JScrollPane(listaAsociados);
+        scrollPane.setPreferredSize(new Dimension(400, 600)); // Más alto
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Método para crear la pestaña de simulación.
+     * Contiene un formulario para configurar la simulación.
+     */
+    private void crearPestanaSimulacion() {
+        JPanel panelSimulacion = new JPanel(new BorderLayout());
+        panelSimulacion.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        panelConfiguracion = new JPanel();
+        panelConfiguracion.setLayout(new BoxLayout(panelConfiguracion, BoxLayout.Y_AXIS));
+
+        // Título
+        JLabel titulo = new JLabel("Configuracion");
+        titulo.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        titulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelConfiguracion.add(titulo);
+
+        panelConfiguracion.add(Box.createVerticalStrut(30));
+
+        // Campo Cantidad de Asociados
+        JPanel panelAsociados = new JPanel(new BorderLayout(10, 5));
+        JLabel labelAsociados = new JLabel("Cantidad de asociados");
+        labelAsociados.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        cantAsociados = new JTextField();
+        panelAsociados.add(labelAsociados, BorderLayout.NORTH);
+        panelAsociados.add(cantAsociados, BorderLayout.CENTER);
+        panelConfiguracion.add(panelAsociados);
+
+        panelConfiguracion.add(Box.createVerticalStrut(20));
+
+        // Campo Cantidad de Solicitudes
+        JPanel panelSolicitudes = new JPanel(new BorderLayout(10, 5));
+        JLabel labelSolicitudes = new JLabel("Cantidad maxima de solicitudes");
+        labelSolicitudes.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        cantSolicitudes = new JTextField();
+        panelSolicitudes.add(labelSolicitudes, BorderLayout.NORTH);
+        panelSolicitudes.add(cantSolicitudes, BorderLayout.CENTER);
+        panelConfiguracion.add(panelSolicitudes);
+
+        panelConfiguracion.add(Box.createVerticalStrut(30));
+
+        // Botón Aceptar
+        aceptarConfiguracionButton = new JButton("Aceptar");
+        aceptarConfiguracionButton.setActionCommand("ACEPTAR");
+        aceptarConfiguracionButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        aceptarConfiguracionButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelConfiguracion.add(aceptarConfiguracionButton);
+
+        panelSimulacion.add(panelConfiguracion, BorderLayout.CENTER);
+        pestañas.addTab("Simulacion", panelSimulacion);
+    }
+    /**
+     * Método para crear un campo de texto con su etiqueta correspondiente.
+     * @param textoEtiqueta El texto de la etiqueta.
+     * @param campoTexto El campo de texto asociado.
+     * @return Un panel que contiene la etiqueta y el campo de texto.
+     */
+    private JPanel crearCampoConEtiqueta(String textoEtiqueta, JTextField campoTexto) {
+        JPanel panel = new JPanel(new BorderLayout(5, 2));
+        JLabel etiqueta = new JLabel(textoEtiqueta);
+        panel.add(etiqueta, BorderLayout.NORTH);
+        panel.add(campoTexto, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Método para aplicar estilos personalizados a los componentes de la interfaz gráfica.
+     * Mejora la apariencia visual de la aplicación.
+     */
+    private void aplicarEstilos() {
+        // Paleta de colores
+        Color fondoPrincipal = new Color(245, 247, 250);
+        Color panelColor = Color.WHITE;
+        Color bordePanel = new Color(220, 220, 220);
+        Color botonColor = new Color(70, 130, 180);
+        Color botonHover = new Color(60, 110, 160);
+        Color labelColor = new Color(50, 50, 50);
+
+        // Fondo principal
+        panelPrincipal.setBackground(fondoPrincipal);
+
+        // Quitar bordes pesados y suavizar paneles (menos líneas)
+        JPanel[] panels = {altaAsociado, bajaAsociado, listaAsociado, panelConfiguracion};
+        for (JPanel p : panels) {
+            if (p != null) {
+                p.setBackground(panelColor);
+                // remove titled/line borders created by GUI designer
+                if (p.getBorder() instanceof TitledBorder) {
+                    p.setBorder(BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(bordePanel),
+                            ((TitledBorder) p.getBorder()).getTitle(),
+                            TitledBorder.DEFAULT_JUSTIFICATION,
+                            TitledBorder.DEFAULT_POSITION,
+                            new Font("Segoe UI", Font.BOLD, 12),
+                            labelColor
+                    ));
+                } else {
+                    p.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+                }
+                p.setOpaque(true);
+            }
+        }
+
+        // Botones modernos (alta / baja)
+        JButton[] buttons = {darDeAltaButton, darDeBajaButton};
+        for (JButton b : buttons) {
+            if (b == null) continue;
+            b.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            b.setBackground(botonColor);
+            b.setForeground(Color.WHITE);
+            b.setFocusPainted(false);
+            b.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20));
+            b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            // Hover effect
+            b.addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent evt) {
+                    b.setBackground(botonHover);
+                }
+
+                public void mouseExited(MouseEvent evt) {
+                    b.setBackground(botonColor);
+                }
+            });
+        }
+
+        // Estilo para el boton Aceptar (Simulacion)
+        if (aceptarConfiguracionButton != null) {
+            JButton b = aceptarConfiguracionButton;
+            b.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            b.setBackground(new Color(88, 101, 242)); // slightly different accent
+            b.setForeground(Color.WHITE);
+            b.setFocusPainted(false);
+            b.setBorder(BorderFactory.createEmptyBorder(8, 18, 8, 18));
+            b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            b.addMouseListener(new MouseAdapter() {
+                public void mouseEntered(MouseEvent evt) {
+                    b.setBackground(botonHover);
+                }
+
+                public void mouseExited(MouseEvent evt) {
+                    b.setBackground(new Color(88, 101, 242));
+                }
+            });
+        }
+
+        // JList: cleaner background, subtle border removed
+        listaAsociados.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        listaAsociados.setBackground(new Color(250, 250, 250));
+        listaAsociados.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+        listaAsociados.setSelectionBackground(new Color(70, 130, 180, 80));
+        listaAsociados.setSelectionForeground(Color.BLACK);
+
+        // Pestañas: cleaner, no heavy border
+        pestañas.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        pestañas.setBackground(fondoPrincipal);
+        pestañas.setForeground(labelColor);
+        pestañas.setBorder(BorderFactory.createEmptyBorder());
+        pestañas.setOpaque(false);
+
+        // Panel de configuracion (Simulacion): centrar contenido y reducir elementos visuales
+        if (panelConfiguracion != null) {
+            panelConfiguracion.setBackground(fondoPrincipal);
+            panelConfiguracion.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        }
+
+        // Hacer que los textFields se vean más modernos (si existen)
+        JTextField[] fields = {Nombre_Alta, Apellido_Alta, DNI_Alta, Ciudad_Alta, Calle_Alta, Numero_Alta, Telefono_Alta, DNI_Baja, cantAsociados, cantSolicitudes};
+        for (JTextField tf : fields) {
+            if (tf == null) continue;
+            tf.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, bordePanel));
+            tf.setBackground(new Color(250, 250, 250));
+            tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            tf.setPreferredSize(new Dimension(150, 26));
+        }
+    }
+
+    /**
+     * Método para asignar el ActionListener a los botones de la interfaz gráfica.
+     * @param controlador El controlador que manejará los eventos de los botones.
+     */
+    @Override
+    public void setActionListener(Controlador controlador) {
+        assert controlador != null;
+        this.darDeAltaButton.addActionListener(controlador);
+        this.darDeBajaButton.addActionListener(controlador);
+        this.aceptarConfiguracionButton.addActionListener(controlador);
+    }
+
+    /**
+     * Método para obtener los datos del nuevo asociado desde el formulario de alta.
+     * @return Un objeto AsociadoDTO con los datos del nuevo asociado.
+     * @throws datosAsociadoDTOIncorrectoException Si los datos ingresados son incorrectos.
+     */
+    @Override
+    public AsociadoDTO getNuevoAsociado() throws datosAsociadoDTOIncorrectoException {
+        String nombre = Nombre_Alta.getText();
+        String apellido = Apellido_Alta.getText();
+        String dni = DNI_Alta.getText();
+        String ciudad = Ciudad_Alta.getText();
+        String calle = Calle_Alta.getText();
+        String numero = Numero_Alta.getText();
+        String telefono = Telefono_Alta.getText();
+
+        if (nombre.isEmpty() || apellido.isEmpty() || dni.isEmpty() || ciudad.isEmpty() || calle.isEmpty() || telefono.isEmpty()) {
+            throw new datosAsociadoDTOIncorrectoException("Debe completar todos los campos.");
+        }
+
+        int numeroReal = Integer.parseInt(numero);
+        if (numeroReal <= 0) {
+            throw new datosAsociadoDTOIncorrectoException("El numero de la calle debe ser un valor positivo.");
+        }
+
+        if (telefono.startsWith("-")) {
+            throw new datosAsociadoDTOIncorrectoException("El telefono no puede ser un valor negativo.");
+        }
+        return new AsociadoDTO(nombre, apellido, dni, ciudad, calle, numeroReal, telefono);
+    }
+
+    /**
+     * Método para obtener la cantidad de asociados desde el formulario de configuración.
+     * @return La cantidad de asociados ingresada.
+     * @throws datosSimulacionIncorrectosException Si los datos ingresados son incorrectos.
+     */
+    @Override
+    public int getCantAsociados() throws datosSimulacionIncorrectosException {
+        if (cantAsociados.getText().isEmpty()) {
+            throw new datosSimulacionIncorrectosException("La cantidad de asociados no puede estar vacia.");
+        }
+
+        int cant = Integer.parseInt(cantAsociados.getText());
+        if (cant <= 0)
+            throw new datosSimulacionIncorrectosException("La cantidad de asociados debe ser un valor positivo.");
+        return cant;
+    }
+
+    /**
+     * Método para obtener la cantidad de solicitudes desde el formulario de configuración.
+     * @return La cantidad de solicitudes ingresada.
+     * @throws datosSimulacionIncorrectosException Si los datos ingresados son incorrectos.
+     */
+    @Override
+    public int getCantSolicitudes() throws datosSimulacionIncorrectosException {
+        if (cantSolicitudes.getText().isEmpty()) {
+            throw new datosSimulacionIncorrectosException("La cantidad de solicitudes no puede estar vacia.");
+        }
+
+        int cant = Integer.parseInt(cantSolicitudes.getText());
+        if (cant <= 0)
+            throw new datosSimulacionIncorrectosException("La cantidad de solicitudes debe ser un valor positivo.");
+        return cant;
+    }
+
+    /**
+     * Método para mostrar un mensaje emergente en la interfaz gráfica.
+     * @param titulo El título del mensaje.
+     * @param mensaje El contenido del mensaje.
+     */
+    @Override
+    public void mostrarMensaje(String titulo, String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, titulo, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Método para limpiar el formulario de alta de asociado.
+     * Resetea todos los campos del formulario a valores vacíos.
+     */
+    @Override
+    public void limpiarFormularioAlta() {
+        Nombre_Alta.setText("");
+        Apellido_Alta.setText("");
+        DNI_Alta.setText("");
+        Ciudad_Alta.setText("");
+        Calle_Alta.setText("");
+        Numero_Alta.setText("");
+        Telefono_Alta.setText("");
+    }
+
+    /**
+     * Método para limpiar el formulario de baja de asociado.
+     * Resetea el campo DNI del formulario a un valor vacío.
+     */
+    @Override
+    public void limpiarFormularioBaja() {
+        DNI_Baja.setText("");
+    }
+
+    /**
+     * Método para actualizar la lista de asociados mostrada en la interfaz gráfica.
+     * @param asociados La lista de asociados a mostrar.
+     */
+    @Override
+    public void actualizarListaAsociados(ArrayList<AsociadoDTO> asociados) {
+        assert asociados != null;
+        this.listaModel.clear();
+        String aux;
+        for (AsociadoDTO a : asociados) {
+            aux =  a.getNombre() + " " + a.getApellido() + ", DNI: " + a.getDni();
+            this.listaModel.addElement(aux);
+        }
+    }
+
+    /**
+     * Método para obtener el DNI ingresado en el formulario de baja de asociado.
+     * @return El DNI ingresado.
+     * @throws datosAsociadoDTOIncorrectoException Si el DNI ingresado es incorrecto.
+     */
+    @Override
+    public String getDNI() throws datosAsociadoDTOIncorrectoException {
+        if (DNI_Baja.getText().isEmpty()) {
+            throw new datosAsociadoDTOIncorrectoException("El campo DNI no puede estar vacio.");
+        }
+
+        if(Integer.parseInt(DNI_Baja.getText()) <= 0)
+            throw new datosAsociadoDTOIncorrectoException("El DNI debe ser un valor positivo.");
+
+        return DNI_Baja.getText();
+    }
+}

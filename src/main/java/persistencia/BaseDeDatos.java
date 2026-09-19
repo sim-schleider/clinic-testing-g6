@@ -1,0 +1,235 @@
+package persistencia;
+
+import java.sql.*;
+/**
+ * Clase BaseDeDatos que maneja la conexión y operaciones básicas con la base de datos MySQL.
+ * Contiene métodos para abrir y cerrar la conexión, así como para ejecutar consultas y actualizaciones.
+ * Utiliza el driver JDBC de MySQL para interactuar con la base de datos.
+ * Tiene como atributos la URL de la base de datos, el usuario y la contraseña.
+ */
+public class BaseDeDatos {
+    private static BaseDeDatos instancia;
+    private Connection conexion;
+    private static final String URL = "jdbc:mysql://localhost:3306/?useSSL=false&serverTimezone=UTC";
+    private static final String USUARIO = "progra_c";
+    private static final String CONTRASENA = "progra_c";
+
+    /**
+     * Constructor de la clase BaseDeDatos.
+     * <b>post:</b> se crea una instancia de BaseDeDatos y se abre la conexión a la base de datos.
+     */
+    private BaseDeDatos() {
+        conexion = null;
+        cargarDriver();
+        abrirConexion();
+        iniciarBD();
+    }
+    /**
+     * Obtiene la instancia única de la clase BaseDeDatos (patrón Singleton).
+     * <b>post:</b> se devuelve la instancia única de BaseDeDatos.
+     * @return La instancia única de BaseDeDatos.
+     */
+    public static BaseDeDatos getInstancia() {
+        if (instancia == null) {
+            instancia = new BaseDeDatos();
+        }
+        return instancia;
+    }
+
+    /**
+     * Carga el driver JDBC de MySQL.
+     * <b>post:</b> se carga el driver JDBC de MySQL.
+     */
+    private void cargarDriver() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Abre la conexión a la base de datos.
+     * <b>post:</b> se abre la conexión a la base de datos.
+     */
+    private void abrirConexion() {
+        try {
+            conexion = DriverManager.getConnection(URL, USUARIO, CONTRASENA);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Cierra la conexión a la base de datos.
+     * <b>post:</b> se cierra la conexión a la base de datos.
+     * @throws SQLException Si ocurre un error al cerrar la conexión.
+     */
+    public void cerrarConexion() throws SQLException {
+        if (conexion != null) {
+            conexion.close();
+        }
+    }
+    /**
+     * Obtiene la conexión a la base de datos.
+     * @return La conexión a la base de datos.
+     */
+    public Connection getConexion() {
+        return conexion;
+    }
+    /**
+     * Ejecuta una consulta SQL y devuelve el resultado.
+     * <b>pre:</b> la consulta debe ser una sentencia SQL válida.
+     * <b>post:</b> se devuelve el resultado de la consulta.
+     * @param consulta La consulta SQL a ejecutar.
+     * @return El resultado de la consulta.
+     * @throws SQLException Si ocurre un error al ejecutar la consulta.
+     */
+    public ResultSet ejecutarConsulta(String consulta, int id) throws SQLException{
+        assert consulta != null;
+        ResultSet rs = null;
+        PreparedStatement stmt = conexion.prepareStatement(consulta);
+        if (id != -1) {
+        stmt.setInt(1, id);
+        }
+        rs = stmt.executeQuery();
+        
+       
+        // stmt.close();
+        return rs;
+    }
+
+    /**
+     * Ejecuta una actualización SQL (UPDATE).
+     * <b>pre:</b> la actualización debe ser una sentencia SQL válida.
+     * <b>post:</b> se ejecuta la actualización en la base de datos.
+     * @param actualizacion La actualización SQL a ejecutar.
+     * @throws SQLException Si ocurre un error al ejecutar la actualización.
+     */
+    public void ejecutarActualizacion(String actualizacion, AsociadoDTO aDTO) throws SQLException{
+        assert  actualizacion != null;
+        assert aDTO != null;
+        PreparedStatement stmt = conexion.prepareStatement(actualizacion);
+        stmt.setString(1, aDTO.getNombre());
+        stmt.setString(2, aDTO.getApellido());
+        stmt.setString(3, aDTO.getDni());
+        stmt.setString(4, aDTO.getCalle());
+        stmt.setInt(5, aDTO.getNumero());
+        stmt.setString(6, aDTO.getCiudad());
+        stmt.setString(7, aDTO.getTelefono());
+        stmt.setInt(8, 1);
+        stmt.executeUpdate();
+        stmt.close();
+    }
+
+    /**
+     * Ejecuta una sentencia INSERT SQL.
+     * <b>pre:</b> la sentencia debe ser una sentencia SQL válida.
+     * <b>post:</b> se ejecuta la inserción en la base de datos.
+     * @param insert La sentencia INSERT SQL a ejecutar.
+     * @throws SQLException Si ocurre un error al ejecutar la inserción.
+     */
+    public void ejecutarInsert(String insert, AsociadoDTO aDTO)throws SQLException {
+        assert   insert != null;
+        assert aDTO != null;
+
+        PreparedStatement stmt = conexion.prepareStatement(insert);
+        stmt.setString(1, aDTO.getNombre());
+        stmt.setString(2, aDTO.getApellido());
+        stmt.setString(3, aDTO.getDni());
+        stmt.setString(4, aDTO.getCalle());
+        stmt.setInt(5, aDTO.getNumero());
+        stmt.setString(6, aDTO.getCiudad());
+        stmt.setString(7, aDTO.getTelefono());
+        stmt.executeUpdate();
+        stmt.close();
+    }
+    /**
+     * Ejecuta una sentencia DELETE SQL.
+     * <b>pre:</b> la sentencia debe ser una sentencia SQL válida.
+     * <b>post:</b> se ejecuta la eliminación en la base de datos.
+     * @param delete La sentencia DELETE SQL a ejecutar.
+     * @throws SQLException Si ocurre un error al ejecutar la eliminación.
+     */
+    public void ejecutarDelete(String delete, String dni) throws SQLException{
+        assert   delete != null;
+        assert dni != null;
+
+        PreparedStatement stmt = conexion.prepareStatement(delete);
+        stmt.setString(1, dni);
+        stmt.executeUpdate();
+        stmt.close();
+    }
+
+    /**
+     * Inicializa la base de datos creando la tabla Asociados y llenándola con datos de ejemplo.
+     * <b>post:</b> se crea la tabla Asociados y se insertan datos de ejemplo.
+     */
+    public void iniciarBD(){
+        String query = "CREATE DATABASE IF NOT EXISTS Grupo_7\n" +
+                "CHARACTER SET utf8\n" +
+                "COLLATE utf8_unicode_ci;";
+        try{
+            Statement stmt = conexion.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        query = "USE Grupo_7;";
+        try{
+            Statement stmt = conexion.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        query = "DROP TABLE IF EXISTS Asociados;";
+        try{
+            Statement stmt = conexion.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        query = "CREATE TABLE IF NOT EXISTS Asociados (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,nombre VARCHAR(30) , apellido VARCHAR(30), DNI VARCHAR(10) UNIQUE, calle VARCHAR(30) , numero INT,  ciudad VARCHAR(35),telefono VARCHAR(15) );";
+        try {
+            Statement stmt = conexion.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        query = "INSERT INTO Asociados (id, nombre, apellido, dni, calle, numero, ciudad, telefono) VALUES\n" +
+                "(1, 'Juan', 'State', '12345678', 'Buenos Aires', 123, 'Mar del Plata', '2235551234'),\n" +
+                "(2, 'Maria', 'Template', '87654321', 'Libertad', 742, 'Mar del Plata', '2235555678'),\n" +
+                "(3, 'Carlos', 'Observer', '11223344', 'Colon', 456, 'Mar del Plata', '2235558765'),\n" +
+                "(4, 'Jose', 'Concurrencia', '21842190', 'Juan B Justo', 200, ' Mar del Plata', '1551232349'),\n" +
+                "(5, 'Xin', 'Dao', '33445566', 'Corrientes', 789, 'Mar del Plata', '2235554321'),\n" +
+                "(6, 'Ana', 'Facade', '66554433', 'San Martin', 321, 'Mar del Plata', '2235556789'),\n" +
+                "(7, 'Laura', 'Singleton', '22334455', 'Alem', 1450, 'Mar del Plata', '2236112233'),\n" +
+                "(8, 'Martin', 'Factory', '33445577', 'Guemes', 2870, 'Mar del Plata', '2236223344'),\n" +
+                "(9, 'Sofia', 'Builder', '44556677', 'Independencia', 1100, 'Mar del Plata', '2236334455'),\n" +
+                "(10, 'David', 'Adapter', '55667788', 'Luro', 3450, 'Mar del Plata', '2236445566'),\n" +
+                "(11, 'Elena', 'Decorator', '66778899', 'Cordoba', 2120, 'Mar del Plata', '2236556677'),\n" +
+                "(12, 'Pedro', 'Proxy', '77889900', 'Rivadavia', 3000, 'Mar del Plata', '155889900'),\n" +
+                "(13, 'Lucia', 'Strategy', '88990011', 'Belgrano', 2500, 'Mar del Plata', '2235001122'),\n" +
+                "(14, 'Diego', 'Command', '99001122', 'Moreno', 3100, 'Mar del Plata', '2235112233'),\n" +
+                "(15, 'Valeria', 'Iterator', '10112233', 'Jara', 850, 'Mar del Plata', '2235223344'),\n" +
+                "(16, 'Miguel', 'Mediator', '12131415', 'Alberti', 1700, 'Mar del Plata', '2235334455'),\n" +
+                "(17, 'Clara', 'Memento', '16171819', 'Garay', 1900, 'Mar del Plata', '155445566'),\n" +
+                "(18, 'Sergio', 'Visitor', '20212223', 'Castelli', 2300, 'Mar del Plata', '2235556677'),\n" +
+                "(19, 'Paula', 'Bridge', '24252627', 'Falucho', 2010, 'Mar del Plata', '2235667788'),\n" +
+                "(20, 'Adrian', 'Composite', '28293031', 'Olavarria', 2700, 'Mar del Plata','2235778899');";
+
+        try{
+            Statement stmt = conexion.createStatement();
+            stmt.execute(query);
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
