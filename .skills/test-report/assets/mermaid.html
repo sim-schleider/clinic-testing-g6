@@ -1,0 +1,12 @@
+<script type="module">
+  // pandoc emits ```mermaid blocks as <pre class="mermaid"><code>…</code></pre>; mermaid wants the bare text.
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs";
+  for (const pre of document.querySelectorAll("pre.mermaid")) {
+    const div = document.createElement("div");
+    div.className = "mermaid";
+    div.textContent = pre.textContent;
+    pre.replaceWith(div);
+  }
+  mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" });
+  await mermaid.run({ querySelector: "div.mermaid" });
+</script>

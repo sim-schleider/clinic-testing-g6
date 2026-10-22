@@ -1,0 +1,50 @@
+@page { size: A4; margin: 22mm 18mm 20mm 18mm; }
+
+body {
+  font-family: "Calibri", "Carlito", "Segoe UI", "DejaVu Sans", Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: #1a1a1a;
+  max-width: none;
+  margin: 0;
+}
+
+.caratula {
+  height: 250mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+  page-break-after: always;
+}
+.caratula .institucion { font-size: 14pt; line-height: 1.6; }
+.caratula .titulo { font-size: 24pt; font-weight: 700; margin: 0; }
+.caratula .subtitulo { font-size: 15pt; color: #444; margin-top: 6mm; }
+.caratula .datos { font-size: 12pt; line-height: 1.7; }
+
+nav#TOC { page-break-after: always; }
+nav#TOC > ul { padding-left: 0; }
+nav#TOC li { list-style: none; margin: 2px 0; }
+nav#TOC ul ul { padding-left: 1.4em; }
+nav#TOC a { color: inherit; text-decoration: none; }
+#toc-title { font-size: 18pt; }
+
+h1 { font-size: 17pt; margin-top: 0; padding-bottom: 3px; border-bottom: 2px solid #2b4c7e; color: #1f3a63; page-break-before: always; }
+h2 { font-size: 13.5pt; margin-top: 1.4em; color: #1f3a63; }
+h3 { font-size: 12pt; margin-top: 1.2em; }
+h1, h2, h3 { page-break-after: avoid; }
+.header-section-number { margin-right: 0.4em; }
+
+table { border-collapse: collapse; width: 100%; margin: 0.8em 0 1.2em; font-size: 9.5pt; page-break-inside: auto; }
+thead { display: table-header-group; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #b8c2cc; padding: 3px 6px; vertical-align: top; text-align: left; }
+th { background: #e8eef5; }
+
+code { font-family: "Consolas", "DejaVu Sans Mono", monospace; font-size: 9pt; }
+pre { background: #f5f7f9; border: 1px solid #dde3e8; padding: 8px; font-size: 8.5pt; white-space: pre-wrap; page-break-inside: avoid; }
+
+figure { margin: 1em 0; text-align: center; page-break-inside: avoid; }
+img { max-width: 100%; border: 1px solid #ccc; }
+figcaption { font-size: 9.5pt; color: #444; margin-top: 4px; }
+div.mermaid { text-align: center; margin: 1em 0; page-break-inside: avoid; }
