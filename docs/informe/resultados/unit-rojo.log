@@ -1,0 +1,154 @@
+>> mvn en docker compose (servicio maven)
+ Container clinic-testing-g6-maven-run-b9368fe39e49 Creating 
+ Container clinic-testing-g6-maven-run-b9368fe39e49 Created 
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< org.example:ClinicaManager_TPG >-------------------
+[INFO] Building ClinicaManager_TPG 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ ClinicaManager_TPG ---
+[INFO] Deleting /app/target
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ ClinicaManager_TPG ---
+[INFO] skip non existing resourceDirectory /app/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ ClinicaManager_TPG ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 73 source files with javac [debug target 17] to target/classes
+[INFO] /app/src/main/java/modelo/modeloDominio/personas/PersonaObservable.java: Some input files use or override a deprecated API.
+[INFO] /app/src/main/java/modelo/modeloDominio/personas/PersonaObservable.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ ClinicaManager_TPG ---
+[INFO] skip non existing resourceDirectory /app/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ ClinicaManager_TPG ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug target 17] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ ClinicaManager_TPG ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running persistencia.AsociadoDTOTest
+[ERROR] Tests run: 18, Failures: 8, Errors: 0, Skipped: 0, Time elapsed: 0.088 s <<< FAILURE! -- in persistencia.AsociadoDTOTest
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullCalle -- Time elapsed: 0.026 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar calle = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullCalle(AsociadoDTOTest.java:128)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullApellido -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar apellido = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullApellido(AsociadoDTOTest.java:91)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullCiudad -- Time elapsed: 0.003 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar ciudad = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullCiudad(AsociadoDTOTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullNombre -- Time elapsed: 0.002 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar nombre = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullNombre(AsociadoDTOTest.java:79)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testSetNumeroAcceptsZero -- Time elapsed: 0.002 s <<< FAILURE!
+java.lang.AssertionError
+	at persistencia.AsociadoDTO.setNumero(AsociadoDTO.java:87)
+	at persistencia.AsociadoDTOTest.testSetNumeroAcceptsZero(AsociadoDTOTest.java:176)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullTelefono -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar telefono = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullTelefono(AsociadoDTOTest.java:141)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNegativeNumero -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar numero = -1 ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNegativeNumero(AsociadoDTOTest.java:153)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[ERROR] persistencia.AsociadoDTOTest.testConstructorRejectsNullDni -- Time elapsed: 0.001 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: el constructor debía rechazar dni = null ==> expected: <true> but was: <false>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertTrue.failNotTrue(AssertTrue.java:63)
+	at org.junit.jupiter.api.AssertTrue.assertTrue(AssertTrue.java:36)
+	at org.junit.jupiter.api.Assertions.assertTrue(Assertions.java:214)
+	at persistencia.AsociadoDTOTest.testConstructorRejectsNullDni(AsociadoDTOTest.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNegativeNumero:153 el constructor debía rechazar numero = -1 ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullApellido:91 el constructor debía rechazar apellido = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullCalle:128 el constructor debía rechazar calle = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullCiudad:116 el constructor debía rechazar ciudad = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullDni:104 el constructor debía rechazar dni = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullNombre:79 el constructor debía rechazar nombre = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testConstructorRejectsNullTelefono:141 el constructor debía rechazar telefono = null ==> expected: <true> but was: <false>
+[ERROR]   AsociadoDTOTest.testSetNumeroAcceptsZero:176
+[INFO] 
+[ERROR] Tests run: 18, Failures: 8, Errors: 0, Skipped: 0
+[INFO] 
+[ERROR] There are test failures.
+
+Please refer to /app/target/surefire-reports for the individual test results.
+Please refer to dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.220 s
+[INFO] Finished at: 2026-10-25T16:16:43Z
+[INFO] ------------------------------------------------------------------------
