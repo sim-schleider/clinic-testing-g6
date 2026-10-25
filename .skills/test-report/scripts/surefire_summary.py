@@ -24,7 +24,8 @@ SUITE_TITLES = {
     "concurrency": "Pruebas de integración y concurrencia",
     "all": "Todas las suites",
 }
-PREFIX_ID = re.compile(r"^(cu|ci|cm|cc)(\d+)_", re.IGNORECASE)
+# Method names "cu3_..." or "testCu3...": the ID is the prefix, optionally after "test".
+PREFIX_ID = re.compile(r"^(?:test_?)?(cu|ci|cm|cc)(\d+)(?=_|[a-z])", re.IGNORECASE)
 ANYWHERE_ID = re.compile(r"\b(CU|CI|CM|CC)(\d+)\b", re.IGNORECASE)
 MAX_DETAIL = 160
 ICONS = {"pass": "✅", "fail": "❌", "error": "💥", "skipped": "⏭"}
@@ -45,9 +46,37 @@ def code_state() -> str:
     return f"commit {commit} · " + ("src/main CON cambios sin commitear" if dirty else "src/main sin cambios")
 
 
-def case_id(name: str) -> str:
+COMMENT_ID = re.compile(r"^\s*//\s*(CU|CI|CM|CC)(\d+)\b")
+METHOD = re.compile(r"\bvoid\s+(\w+)\s*\(")
+
+
+def ids_from_comments(root: pathlib.Path = pathlib.Path("src/test/java")) -> dict:
+    """Map (test class, method) to the case ID written in the comment right above the method."""
+    ids = {}
+    for path in root.rglob("*.java"):
+        pending = ""
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            comment = COMMENT_ID.match(line)
+            if comment:
+                pending = (comment.group(1) + comment.group(2)).upper()
+                continue
+            method = METHOD.search(line)
+            if method:
+                if pending:
+                    ids[(path.stem, method.group(1))] = pending
+                pending = ""
+    return ids
+
+
+SOURCE_IDS = ids_from_comments()
+
+
+def case_id(name: str, test_class: str = "") -> str:
     match = PREFIX_ID.match(name) or ANYWHERE_ID.search(name)
-    return (match.group(1) + match.group(2)).upper() if match else ""
+    if match:
+        return (match.group(1) + match.group(2)).upper()
+    # Method without the ID in its name: take it from the "// CU3 – ..." comment above it.
+    return SOURCE_IDS.get((test_class.split("$")[0], name.split("(")[0]), "")
 
 
 def clean(text: str) -> str:
@@ -67,7 +96,7 @@ def classify(case: ET.Element) -> dict:
             break
     name = case.get("name", "")
     test_class = case.get("classname", "").rsplit(".", 1)[-1].replace("$", " › ")
-    return {"class": test_class, "test": name, "id": case_id(name), "status": status, "detail": clean(detail)}
+    return {"class": test_class, "test": name, "id": case_id(name, case.get("classname", "").rsplit(".", 1)[-1]), "status": status, "detail": clean(detail)}
 
 
 def natural_key(case: dict) -> tuple:
