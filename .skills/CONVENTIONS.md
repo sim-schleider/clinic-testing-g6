@@ -42,7 +42,7 @@ link.
 ## Rules every skill follows
 
 - **The oracle is the specification**: SRS (`docs/SRS_Persistencia_Clinica.md`), the assignment,
-  UML diagrams (`docs/UML*.png`), Javadoc contracts and the design report (`docs/Informe.pdf`).
+  UML diagrams (removed from `docs/`; recover them from git history, see `git log --diff-filter=D -- docs/UML.png`), Javadoc contracts and the design report (`docs/Informe.md`).
   Never the current behaviour of the code. A test that fails because the code disagrees with
   the spec is a finding, not a broken test. Gaps in the spec are written down as *supuestos*.
 - **Production code changes only with the user's OK**, one defect per commit

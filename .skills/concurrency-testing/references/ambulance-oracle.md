@@ -5,9 +5,9 @@ design documents, **not** from the implementation. When the code disagrees with 
 is a finding.
 
 Sources:
-- **[UML]** `docs/UML-State2.png`: the "create" arrows say which state creates which.
+- **[UML]** the State diagram (`UML-State2.png`, removed from `docs/`; in git history before the commit that deleted it): the "create" arrows say which state creates which.
 - **[JD]** Javadoc of each state class and of `Ambulancia` / `RetornoAutomatico`.
-- **[INF]** `docs/Informe.pdf`, section "Ambulancia". It says:
+- **[INF]** `docs/Informe.md`, section "Ambulancia". It says:
   - the ambulance "notifica a observadores cuando la ambulancia se encuentra en un estado en el que
     no puede cumplir una solicitud";
   - it uses `synchronized` "para que no los usen varios hilos a la vez";

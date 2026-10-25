@@ -38,7 +38,7 @@ belongs to `concurrency-testing`.
 
 - **Oracle**: `.skills/concurrency-testing/references/ambulance-oracle.md`. Read §1 (the
   transition table), §2 (the occupancy invariant) and §3 (the `Ambulancia` method contract). That
-  file is derived from the UML, the Javadoc and `docs/Informe.pdf`, not from the code.
+  file is derived from the UML, the Javadoc and `docs/Informe.md`, not from the code.
 - **Code**: `modelo/modeloDominio/ambulancia/*`: `Ambulancia`, `State`, the six states and
   `RetornoAutomatico`. Read them for signatures and injection points only. The oracle file gives
   the expected results.

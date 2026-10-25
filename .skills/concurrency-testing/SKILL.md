@@ -54,7 +54,7 @@ These rules come from that:
   - §3 the `Ambulancia` method contract,
   - §4 `RetornoAutomatico`.
 
-  It is derived from the UML, the Javadoc and `docs/Informe.pdf`, not from the code.
+  It is derived from the UML, the Javadoc and `docs/Informe.md`, not from the code.
 - **Code**: `modelo/modeloDominio/ambulancia/*`, `Asociado`, `Operario`, `TiempoMuerto` (random
   0–8 s sleeps), and `Clinica.iniciarSimulacion` (how the threads are started in production).
   Read them to find the shared state and the synchronized regions. Expected results come from the
