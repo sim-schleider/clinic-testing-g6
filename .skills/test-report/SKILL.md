@@ -104,6 +104,36 @@ Read `references/report-structure.md` for the content of each section and the wr
 
 Replace every `TODO`. The checker blocks the delivery while any remain.
 
+### 4b. Write the informe into the shared Google Doc
+
+The group's informe lives in a Google Doc that the team edits together, and the Google Docs MCP
+connector (`mcp__claude_ai_Google_Docs__read_doc`, `mcp__claude_ai_Google_Docs__update_doc`) is
+available to write into it:
+
+https://docs.google.com/document/d/13xLZ_v2hmLqQIIREEyYeLQkdsPMo5rQ6rHuUes3aQwM/edit?usp=sharing
+(document ID `13xLZ_v2hmLqQIIREEyYeLQkdsPMo5rQ6rHuUes3aQwM`)
+
+- Load the `anthropic-skills:google-workspace` skill before the first write.
+- **One tab per item of the assignment** (`docs/Enunciado_Trabajo_final.md` §2):
+
+  | Tab | Content (source sections) |
+  |-----|---------------------------|
+  | `1) Testing de AsociadoDTO` | `03-unitarias.md` + its rows of `07-defectos.md` |
+  | `2) Testing de Integración` | `04-integracion-bd.md` + its rows of `07-defectos.md` |
+  | `3) Testing con Mocks y Concurrencia` | `05-mocks.md`, `06-concurrencia.md` + their rows of `07-defectos.md` |
+
+- **Never write in the main tab** (`tab=t.0`). The team merges the item tabs into it by hand.
+- The local `docs/informe/` files stay the source of truth: write or update the section there
+  first, then copy it to its tab. Read the tab before writing, and replace only that item's
+  content; never delete text someone else added.
+- If a tab is missing, create it (`addDocumentTab` request). If the connector rejects that,
+  ask the user to create it by hand with the name above.
+- If reading the doc returns `Permission denied`, the connected Google account has no access:
+  ask the user to share the doc with that account (as editor) and stop; don't fall back to
+  creating another document.
+- Screenshots (`capturas/*.png`) can't be uploaded through the connector (it only inserts
+  public image URLs): leave a placeholder line `[Captura: <archivo>.png]` and tell the user.
+
 ### 5. Generate the appendices
 
 ```bash
