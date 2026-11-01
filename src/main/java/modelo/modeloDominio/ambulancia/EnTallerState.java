@@ -1,4 +1,4 @@
-package modelo.modeloDominio.ambulancia;
+package model.modeloDominio.ambulancia;
 
 import modelo.modeloAplicacion.NotificacionSimulacion;
 /**
