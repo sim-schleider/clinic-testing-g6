@@ -102,7 +102,7 @@ stateDiagram-v2
 
 Ejecución del 31/10/2026, sobre el código provisto con solo las correcciones de compilación D1 y D2
 aplicadas. Esas correcciones se revirtieron después por indicación de la cátedra: con el código tal
-como se entregó la suite no compila (ver la sección de integración con MySQL).
+como se entregó la suite no compila (ver los defectos D1 y D2 en el registro de defectos).
 
 | Suite | Total | Pasan | Fallan |
 |-------|-------|-------|--------|
