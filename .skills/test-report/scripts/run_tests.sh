@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Runs one test suite and, for evidence runs, saves the log, the results table and the screenshot.
+# Runs one test suite and, for evidence runs, saves the log and the results table.
+# Screenshots are never generated: the team takes them from the IDE (see SKILL.md, step 2).
 #
 # Usage (from the project root):
 #   run_tests.sh <suite> <fase> [--no-run] [-- <extra mvn args>]
 #
 #   suite   unit | integration | mock | concurrency | all   (JUnit 5 @Tag; "all" runs everything)
 #   fase    rojo | verde   evidence run: writes docs/informe/resultados/<suite>-<fase>.{log,md}
-#                          and docs/informe/capturas/<suite>-<fase>.png
 #           dev            iteration run: prints the results table, saves nothing
 #   --no-run  do not run Maven; summarize the existing target/surefire-reports
 #             (for runs made from IntelliJ's Maven panel)
@@ -17,11 +17,10 @@ set -uo pipefail
 
 readonly SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly RESULTS_DIR="docs/informe/resultados"
-readonly CAPTURES_DIR="docs/informe/capturas"
 readonly REPORTS_DIR="target/surefire-reports"
 readonly MAVEN_IMAGE="maven:3.9-eclipse-temurin-17"
 
-usage() { sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2; }
 
 [[ $# -ge 2 ]] || usage
 suite="$1"; fase="$2"; shift 2
@@ -94,5 +93,4 @@ fi
 
 summary="$RESULTS_DIR/$suite-$fase.md"
 python3 -I "$SKILL_DIR/scripts/surefire_summary.py" "${summary_args[@]}" --out "$summary" || exit 1
-python3 -I "$SKILL_DIR/scripts/capture.py" "$summary" --out "$CAPTURES_DIR/$suite-$fase.png" \
-    || echo "Aviso: no se pudo generar la captura (ver capture.py)" >&2
+echo "Captura requerida: docs/informe/capturas/$suite-$fase.png (la toma el equipo desde el IDE)" >&2

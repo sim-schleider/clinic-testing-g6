@@ -6,7 +6,8 @@
 #
 # Output: docs/informe/informe.pdf (and docs/informe/informe.docx with --docx; Mermaid diagrams are not
 # rendered in the .docx). The intermediate HTML is in docs/informe/build/.
-# Needs pandoc and a Chromium-family browser (see capture.py). Mermaid diagrams are rendered by
+# Needs pandoc and a Chromium-family browser ($CHROME, chromium/google-chrome in PATH, or
+# Playwright's build in ~/.cache/ms-playwright). Mermaid diagrams are rendered by
 # mermaid.js loaded from a CDN, so the export needs network access for them.
 set -euo pipefail
 
@@ -20,13 +21,15 @@ shopt -s nullglob
 sections=("$INFORME"/secciones/*.md)
 [[ ${#sections[@]} -gt 0 ]] || { echo "No hay secciones en $INFORME/secciones" >&2; exit 2; }
 
-chrome="$(python3 -I -B - "$SKILL_DIR/scripts" <<'EOF'
-import sys
-sys.path.insert(0, sys.argv[1])
-from capture import find_chrome
-print(find_chrome() or "")
-EOF
-)"
+find_chrome() {
+    local c
+    for c in "${CHROME:-}" $(command -v chromium chromium-browser google-chrome google-chrome-stable 2>/dev/null) \
+             $(ls -d "$HOME"/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell \
+                     "$HOME"/.cache/ms-playwright/chromium-*/chrome-linux64/chrome 2>/dev/null | sort -r); do
+        [[ -n "$c" && -x "$c" ]] && { echo "$c"; return; }
+    done
+}
+chrome="$(find_chrome)"
 [[ -n "$chrome" ]] || { echo "No se encontró Chromium/Chrome (definir \$CHROME)" >&2; exit 2; }
 
 mkdir -p "$BUILD"

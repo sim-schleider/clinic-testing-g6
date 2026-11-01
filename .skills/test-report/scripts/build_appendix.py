@@ -6,7 +6,7 @@ Usage (from the project root):
 
 Writes:
     secciones/90-apendice-resultados.md  results tables of every suite, red then green
-    secciones/91-apendice-capturas.md    every screenshot in capturas/, red then green
+    secciones/91-apendice-capturas.md    the team's screenshots in capturas/, and the ones still required
     secciones/93-apendice-codigo.md      the test classes in src/test/java with their tags and case counts
 """
 import argparse
@@ -43,17 +43,31 @@ def results_appendix(informe: pathlib.Path) -> str:
 
 
 def captures_appendix(informe: pathlib.Path) -> str:
+    """Lists the screenshots the delivery requires. They are taken by the team, never generated:
+    a screenshot that is already in capturas/ is shown, and a missing one is left as a request."""
     parts = [GENERATED, "# Apéndice B: Capturas de ejecución {.unnumbered}\n\n",
-             "Capturas de cada suite en rojo (detección de los errores sobre el código original) y en verde "
-             "(funcionamiento correcto tras las correcciones).\n"]
+             "La consigna requiere capturas de cada suite en rojo (detección de los errores sobre el código "
+             "provisto) y en verde (funcionamiento correcto). Las capturas las toma el equipo desde el IDE, "
+             "sobre la misma ejecución cuyos resultados figuran en el Apéndice A, y se guardan en "
+             "`docs/informe/capturas/<suite>-<fase>.png`.\n"]
     captures = informe / "capturas"
     known = set()
-    for suite, title in SUITES:
+    pending = []
+    for suite, title in SUITES[:-1]:
         for fase, label in FASES:
             png = captures / f"{suite}-{fase}.png"
+            known.add(png.name)
             if png.exists():
-                known.add(png.name)
                 parts.append(f"\n![{title}, {label}](../capturas/{png.name})\n")
+            else:
+                pending.append(f"| {title} | {fase.capitalize()} | `mvn test -Dgroups={suite}` | `capturas/{png.name}` |")
+    if pending:
+        parts.append("\n## Capturas requeridas {.unnumbered}\n\n"
+                     "Las siguientes capturas todavía no fueron tomadas. Cada una debe mostrar el panel de "
+                     "resultados de JUnit en IntelliJ (árbol de tests con sus estados y el total de "
+                     "pasados y fallidos) de la ejecución indicada.\n\n"
+                     "| Suite | Fase | Ejecución | Archivo |\n|-------|------|-----------|---------|\n"
+                     + "\n".join(pending) + "\n")
     others = sorted(p.name for p in captures.glob("*.png") if p.name not in known) if captures.is_dir() else []
     for name in others:
         parts.append(f"\n![{pathlib.Path(name).stem}](../capturas/{name})\n")

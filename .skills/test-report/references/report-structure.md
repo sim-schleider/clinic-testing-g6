@@ -17,7 +17,7 @@ automatic index:
 | `07-defectos.md` | 7. Registro de defectos | every skill (one row per defect) |
 | `08-conclusiones.md` | 8. Conclusiones | test-report |
 | `90-apendice-resultados.md` | Apéndice A: Resultados de ejecución | generated |
-| `91-apendice-capturas.md` | Apéndice B: Capturas | generated |
+| `91-apendice-capturas.md` | Apéndice B: Capturas (the team's screenshots, and the ones still required) | generated |
 | `92-apendice-entorno.md` | Apéndice C: Entorno y reproducción | test-report |
 | `93-apendice-codigo.md` | Apéndice D: Código fuente de las suites | generated |
 
@@ -64,8 +64,8 @@ Appendices carry `{.unnumbered}`.
   "set número").
 - Don't paste large chunks of code. Cite the file and line (`DataAccessObject.java:85`) and, at
   most, the 2–5 relevant lines.
-- Write figure captions as the image alt text (`![Suite unitaria, en rojo](../capturas/unit-rojo.png)`);
-  pandoc turns it into a caption.
+- Screenshots are taken by the team and shown only in Apéndice B. In the sections, refer to them
+  ("ver Apéndice B"); don't embed an image that doesn't exist yet.
 
 ## 4. Defect descriptions
 

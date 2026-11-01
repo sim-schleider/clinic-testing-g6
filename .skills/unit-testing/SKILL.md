@@ -152,8 +152,8 @@ IDs are `FU1…`. A fault nobody catches means a missing case: add the case and 
 
 ### 10. Write results and conclusions
 
-Fill in "Resultados": counts in red and green, and a pointer to the appendix and screenshots
-that `test-report` generates. "Conclusiones" should cover:
+Fill in "Resultados": counts in red and green, and a pointer to the results appendix and to
+Apéndice B, where the screenshots the team takes go. "Conclusiones" should cover:
 
 - what the suite proved,
 - which defects it found and which requirement each violates,

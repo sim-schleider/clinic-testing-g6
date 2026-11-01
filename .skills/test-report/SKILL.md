@@ -1,6 +1,6 @@
 ---
 name: test-report
-description: Produce the deliverables of the testing assignment. Runs the suites and saves the red and green evidence (results tables and screenshots), keeps the defect registry, writes the general sections of the informe (introducción, estrategia, conclusiones), generates the appendices, checks everything against the "Criterios de Entrega" and exports the informe to PDF. Use this whenever the user mentions the informe or report, "capturas en verde y en rojo", evidence, screenshots of test runs, "apéndice", "resultados", "registro de defectos", "conclusiones", exporting to PDF/Word, running a suite "para la entrega", or asks what is missing before submitting. Not for designing or writing the tests themselves (unit-testing, db-integration-testing, mock-testing, concurrency-testing), although those skills call its scripts to run suites.
+description: Produce the deliverables of the testing assignment. Runs the suites and saves the red and green evidence (results tables), lists the screenshots the team must take, keeps the defect registry, writes the general sections of the informe (introducción, estrategia, conclusiones), generates the appendices, checks everything against the "Criterios de Entrega" and exports the informe to PDF. Use this whenever the user mentions the informe or report, "capturas en verde y en rojo", evidence, screenshots of test runs, "apéndice", "resultados", "registro de defectos", "conclusiones", exporting to PDF/Word, running a suite "para la entrega", or asks what is missing before submitting. Not for designing or writing the tests themselves (unit-testing, db-integration-testing, mock-testing, concurrency-testing), although those skills call its scripts to run suites.
 ---
 
 # Test report: evidence, informe and delivery check
@@ -10,7 +10,7 @@ This skill owns everything that turns test work into the deliverable:
 | Assignment criterion | Produced by |
 |----------------------|-------------|
 | Código fuente de las suites | the testing skills; listed in the appendix by `build_appendix.py` |
-| Capturas en verde y en rojo | `run_tests.sh` → `capture.py` |
+| Capturas en verde y en rojo | taken by the team from the IDE; `build_appendix.py` lists the ones still required |
 | Diseño formal de escenarios, casos con clases de equivalencia y valores límite | the testing skills' sections, checked by `check_report.py` |
 | Conclusiones y resultados obtenidos | sections 03–06 and 08, and appendices A–D |
 
@@ -24,10 +24,9 @@ All of them run from the project root:
 
 | Script | Does |
 |--------|------|
-| `scripts/run_tests.sh <suite> <fase> [--no-run] [-- mvn args]` | Runs a suite (unit, integration, mock, concurrency, all). For `rojo`/`verde` it saves `resultados/<suite>-<fase>.{log,md}` and `capturas/<suite>-<fase>.png`; `dev` only prints |
+| `scripts/run_tests.sh <suite> <fase> [--no-run] [-- mvn args]` | Runs a suite (unit, integration, mock, concurrency, all). For `rojo`/`verde` it saves `resultados/<suite>-<fase>.{log,md}`; `dev` only prints |
 | `scripts/surefire_summary.py` | Surefire XML → results table with case IDs, date and commit (called by `run_tests.sh`) |
-| `scripts/capture.py <resumen.md> --out <png>` | Results table → JUnit-style panel → PNG through headless Chromium |
-| `scripts/build_appendix.py` | Regenerates appendices A (results), B (screenshots) and D (test code) |
+| `scripts/build_appendix.py` | Regenerates appendices A (results), B (screenshots taken by the team, and the ones still required) and D (test code) |
 | `scripts/check_report.py` | Delivery checklist; exits 1 if something blocks the delivery |
 | `scripts/export_pdf.sh [--docx]` | Sections + carátula → `docs/informe/informe.pdf` (pandoc + Chromium) |
 
@@ -64,8 +63,8 @@ The evidence is only worth something if it is honest:
   fault. The summary header records the commit and whether `src/main` had uncommitted changes.
   `check_report.py` rejects evidence taken with uncommitted production changes.
 - **`verde`** runs after the approved fixes are **committed**.
-- Run each suite separately (`unit`, `integration`, `mock`, `concurrency`), so each screenshot
-  shows one assignment item.
+- Run each suite separately (`unit`, `integration`, `mock`, `concurrency`), so each result
+  table and each screenshot covers one assignment item.
 
 ```bash
 .skills/test-report/scripts/run_tests.sh unit rojo
@@ -77,8 +76,16 @@ If Maven can't run here (no Java in WSL, and Docker without WSL integration), th
 `mvn test -Dgroups=unit` from IntelliJ's Maven panel. Then summarize with
 `run_tests.sh unit rojo --no-run`.
 
-The rendered screenshot reproduces the real Surefire results. If the user prefers IDE
-screenshots, save them as `docs/informe/capturas/<suite>-<fase>.png` and they take precedence.
+**Screenshots are never produced here.** Don't render, generate or fake them (no HTML panels,
+no headless browser, no images built from the results table): only a real screenshot of the
+IDE counts as evidence, and taking it is the team's job. For each `rojo`/`verde` run:
+
+1. Tell the user which screenshot is now required: the JUnit results panel in IntelliJ for that
+   suite and phase, saved as `docs/informe/capturas/<suite>-<fase>.png`.
+2. Leave the request written in the informe: `build_appendix.py` turns every missing screenshot
+   into a row of the "Capturas requeridas" table in Apéndice B, and shows the ones that exist.
+3. In the testing sections, refer to the screenshot by pointing to Apéndice B, never as if it
+   already existed.
 
 A test still red in `verde` must be explained: either an open defect, or one that won't be fixed
 and why. Don't hide it.
@@ -131,8 +138,8 @@ https://docs.google.com/document/d/13xLZ_v2hmLqQIIREEyYeLQkdsPMo5rQ6rHuUes3aQwM/
 - If reading the doc returns `Permission denied`, the connected Google account has no access:
   ask the user to share the doc with that account (as editor) and stop; don't fall back to
   creating another document.
-- Screenshots (`capturas/*.png`) can't be uploaded through the connector (it only inserts
-  public image URLs): leave a placeholder line `[Captura: <archivo>.png]` and tell the user.
+- Screenshots are pasted into the doc by the team. Leave a placeholder line
+  `[Captura requerida: <suite>-<fase>.png]` where each one goes and tell the user.
 
 ### 5. Generate the appendices
 
@@ -166,7 +173,7 @@ Open the PDF (Read tool, a few pages at a time) and check:
 - the carátula and the index;
 - the tables are not cut off;
 - the Mermaid diagrams rendered (they need network access for mermaid.js);
-- the screenshots are readable.
+- the team's screenshots are in place and readable, and Apéndice B lists no pending one.
 
 Only then report the delivery as ready.
 
@@ -174,6 +181,8 @@ Only then report the delivery as ready.
 
 - Edit a results table or a generated appendix by hand, or write results the scripts didn't
   produce.
+- Generate, render or edit a screenshot, or present one as taken when it isn't. Screenshots come
+  only from the team.
 - Label a run on modified code (seeded faults, uncommitted fixes) as `rojo` original or `verde`.
 - Invent carátula data, results, defects or conclusions that the evidence doesn't support.
 - Write the conclusions before the evidence exists.

@@ -104,7 +104,8 @@ def main() -> int:
             if fase == "verde" and failing:
                 ids = sorted({x["id"] or "?" for x in failing})
                 r.add("⚠", f"{suite}-verde tiene {len(failing)} fallidos ({', '.join(ids)}): justificarlos en 07-defectos.md")
-            r.add("✅" if png.exists() else "❌", f"capturas/{suite}-{fase}.png")
+            r.add("✅" if png.exists() else "❌", f"capturas/{suite}-{fase}.png" if png.exists()
+                  else f"falta capturas/{suite}-{fase}.png: la toma el equipo desde el IDE (ver Apéndice B)")
 
     r.title("Trazabilidad diseño ↔ ejecución")
     for suite, ids in designed.items():
