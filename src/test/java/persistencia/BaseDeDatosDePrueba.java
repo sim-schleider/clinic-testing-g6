@@ -44,12 +44,16 @@ final class BaseDeDatosDePrueba {
         }
     }
 
-    static int contarFilas() throws SQLException {
-        try (Connection c = conexionPropia(); Statement st = c.createStatement();
-             ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM Asociados")) {
+    /** La primera celda del resultado de una consulta (por ejemplo, un COUNT). */
+    static String valor(String sql) throws SQLException {
+        try (Connection c = conexionPropia(); Statement st = c.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             rs.next();
-            return rs.getInt(1);
+            return rs.getString(1);
         }
+    }
+
+    static int contarFilas() throws SQLException {
+        return Integer.parseInt(valor("SELECT COUNT(*) FROM Asociados"));
     }
 
     /**

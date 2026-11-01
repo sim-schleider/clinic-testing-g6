@@ -16,13 +16,13 @@ import static persistencia.BaseDeDatosDePrueba.*;
 /**
  * Pruebas de integración AsociadoDTO → DataAccessObject → BaseDeDatos → MySQL real (SRS §3.3).
  * Cada escritura se verifica con SQL propio (BaseDeDatosDePrueba), nunca leyendo con el mismo DAO.
- * Los valores límite salen del esquema que crea iniciarBD(): VARCHAR(30) para nombre, apellido y
- * calle, VARCHAR(35) para ciudad, VARCHAR(10) para DNI y VARCHAR(15) para telefono.
+ * Los valores límite salen del esquema que crea iniciarBD() (la SRS no fija largos): VARCHAR(30) para
+ * nombre, apellido y calle, VARCHAR(35) para ciudad, VARCHAR(10) para DNI y VARCHAR(15) para telefono.
+ * Supuestos: un texto más largo que su columna produce SQLException (MySQL 8 en modo estricto), y las
+ * cargas devuelven las filas en el orden del id (la SRS no define un orden).
  */
 @Tag("integration")
 class DataAccessObjectIntegrationTest {
-
-    private static final String FILA_1 = "Juan|State|12345678|Buenos Aires|123|Mar del Plata|2235551234\n";
 
     private DataAccessObject dao;
 
@@ -33,6 +33,7 @@ class DataAccessObjectIntegrationTest {
         dao = new DataAccessObject();
     }
 
+    /** Crea un Asociado; los argumentos van en el orden de las columnas de la tabla. */
     private static Asociado asociado(String nombre, String apellido, String dni, String calle,
                                      int numero, String ciudad, String telefono) {
         return new Asociado(nombre, apellido, dni, telefono, new Domicilio(calle, numero, ciudad));
@@ -41,6 +42,12 @@ class DataAccessObjectIntegrationTest {
     /** Asociado válido con un valor distinto en cada campo, para detectar columnas cruzadas. */
     private static Asociado asociadoValido() {
         return asociado("Nombre", "Apellido", "40111222", "Calle", 777, "Ciudad", "2230001111");
+    }
+
+    /** guardar debe fallar con SQLException y no insertar ninguna fila. */
+    private void assertGuardarRechazado(Asociado asociado) throws SQLException {
+        assertThrows(SQLException.class, () -> dao.guardar(asociado));
+        assertEquals(20, contarFilas(), "no debía insertarse ninguna fila");
     }
 
     // ---------------------------------------------------------------- guardar
@@ -64,13 +71,8 @@ class DataAccessObjectIntegrationTest {
                 + "|1|" + "M".repeat(35) + "|" + "2".repeat(15) + "\n", filas("DNI = '1111111111'"));
     }
 
-    // CI10 a CI15 – guardar con un texto un carácter más largo que su columna (valor límite
-    // inválido), una columna por caso. Esperado: SQLException y la tabla sin filas nuevas.
-
-    private void assertGuardarRechazado(Asociado asociado) throws SQLException {
-        assertThrows(SQLException.class, () -> dao.guardar(asociado));
-        assertEquals(20, contarFilas(), "no debía insertarse ninguna fila");
-    }
+    // CI10 a CI15: guardar con un texto un carácter más largo que su columna (valor límite
+    // inválido), una columna por caso. Esperado (supuesto): SQLException y la tabla sin filas nuevas.
 
     // CI10 – nombre de 31 caracteres.
     @Test
@@ -129,9 +131,9 @@ class DataAccessObjectIntegrationTest {
 
     // CI18 – cargar(1), primera fila. Esperado: un DTO igual a la fila 1 (SRS §3.3, carga individual).
     @Test
-    void testCargarFirstRow() {
+    void testCargarFirstRow() throws SQLException {
         AsociadoDTO dto = assertDoesNotThrow(() -> dao.cargar(1));
-        assertEquals(FILA_1, comoFila(dto));
+        assertEquals(filas("id = 1"), comoFila(dto));
     }
 
     // CI19 – cargar(20), última fila. Esperado: un DTO igual a la fila 20.
@@ -154,7 +156,7 @@ class DataAccessObjectIntegrationTest {
         ArrayList<AsociadoDTO> dtos = dao.cargarConLimite(1);
 
         assertEquals(1, dtos.size());
-        assertEquals(FILA_1, comoFila(dtos.get(0)));
+        assertEquals(filas("id = 1"), comoFila(dtos.get(0)));
     }
 
     // CI22 – cargarConLimite(20), límite igual a la cantidad de filas. Esperado: 20 elementos.
@@ -255,7 +257,8 @@ class DataAccessObjectIntegrationTest {
     }
 
     // CI32 – La tabla no existe (borrada con SQL propio) y se llama a cargarBD().
-    // Esperado: la SQLException llega a quien llama al DAO.
+    // Esperado: la SQLException llega a quien llama al DAO (Javadoc: "@throws SQLException Si ocurre
+    // un error al interactuar con la base de datos").
     @Test
     void testCargarBDWithoutTableThrowsSQLException() throws SQLException {
         ejecutar("DROP TABLE Asociados");
