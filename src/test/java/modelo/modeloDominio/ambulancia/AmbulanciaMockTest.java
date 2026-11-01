@@ -15,12 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Pruebas de Ambulancia con la interfaz State reemplazada por un mock: no se usa ningún estado
- * concreto. Se verifica que la ambulancia delegue en el estado actual el método que corresponde,
- * una sola vez, y que maneje la ocupación, la simulación y las notificaciones.
- * Oráculo: .skills/concurrency-testing/references/ambulance-oracle.md §3 (Javadoc e informe de diseño).
- * Los casos con la ambulancia ocupada y la simulación activa bloquean el hilo: van en la suite de
- * concurrencia.
+ * Pruebas de Ambulancia con la interfaz State reemplazada por un mock, sin ningún estado concreto:
+ * la ambulancia debe delegar en el estado actual el método que corresponde, una sola vez.
+ * Oráculo: .skills/concurrency-testing/references/ambulance-oracle.md §3.
  */
 @Tag("mock")
 class AmbulanciaMockTest {
@@ -44,9 +41,9 @@ class AmbulanciaMockTest {
         operario = new Operario("Juan", "Perez", "20111222", "2230002222", domicilio, ambulancia);
     }
 
-    /** El observador recibió al menos una notificación de la ambulancia. */
+    /** El observador recibió una notificación de la ambulancia. */
     private void assertNotificado() {
-        verify(observador, atLeastOnce()).update(same(ambulancia), any(NotificacionSimulacion.class));
+        verify(observador).update(same(ambulancia), any(NotificacionSimulacion.class));
     }
 
     // ---------------------------------------------------------------- Pedidos con la ambulancia libre
@@ -183,5 +180,25 @@ class AmbulanciaMockTest {
         assertTimeoutPreemptively(Duration.ofSeconds(2), () -> ambulancia.trasladarALaClinica(asociado));
 
         verifyNoInteractions(estado);
+    }
+
+    // ---------------------------------------------------------------- Estado mock con comportamiento
+
+    // CM37 – El estado mock simula una transición: al pedir un traslado cambia la ambulancia a otro
+    // estado mock. Luego se regresa sin paciente. Esperado: el retorno se delega en el estado nuevo,
+    // no en el anterior (la ambulancia siempre delega en su estado actual).
+    @Test
+    void testDelegatesToStateSetByPreviousTransition() {
+        State otroEstado = mock(State.class);
+        doAnswer(invocacion -> {
+            ambulancia.setState(otroEstado);
+            return null;
+        }).when(estado).SolicitudDeTraslado();
+
+        ambulancia.trasladarALaClinica(asociado);
+        ambulancia.regresarSinPaciente();
+
+        verify(otroEstado).RetornoClinica();
+        verify(estado, never()).RetornoClinica();
     }
 }

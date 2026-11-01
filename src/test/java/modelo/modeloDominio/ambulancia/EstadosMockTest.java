@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
 /**
- * Pruebas de cada estado concreto con la Ambulancia reemplazada por un mock. Cubren las 24 celdas
- * de la tabla de transiciones (6 estados × 4 eventos), una por caso, sin hilos ni esperas.
- * Oráculo: diagrama UML de estados, Javadoc de cada estado e informe de diseño ("notifica a
- * observadores cuando la ambulancia se encuentra en un estado en el que no puede cumplir una
- * solicitud"). Ver .skills/concurrency-testing/references/ambulance-oracle.md §1.
+ * Pruebas de cada estado concreto con la Ambulancia reemplazada por un mock: una por cada celda de
+ * la tabla de transiciones (6 estados × 4 eventos). Oráculo: ambulance-oracle.md §1 (UML, Javadoc
+ * e informe de diseño: "notifica a observadores cuando […] no puede cumplir una solicitud").
  */
 @Tag("mock")
 class EstadosMockTest {
@@ -62,7 +60,7 @@ class EstadosMockTest {
     @Test
     void testDisponibleRetornoClinica() {
         new DisponibleState(ambulancia).RetornoClinica();
-        verify(ambulancia, never()).setState(any());
+        verifyNoInteractions(ambulancia);
     }
 
     // ---------------------------------------------------------------- AtendiendoEnDomicilio
@@ -149,7 +147,8 @@ class EstadosMockTest {
         assertCambiaA(RegresandoDelTallerState.class);
     }
 
-    // CM28 – EnTaller + RetornoClinica. Esperado: rechaza ("no puede retornar a la clínica").
+    // CM28 – EnTaller + RetornoClinica. Esperado (supuesto: el retorno se trata como un pedido más):
+    // rechaza ("no puede retornar a la clínica").
     @Test
     void testEnTallerRetornoClinica() {
         new EnTallerState(ambulancia).RetornoClinica();
