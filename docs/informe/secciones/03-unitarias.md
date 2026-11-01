@@ -129,8 +129,8 @@ Ejecución sobre el código provisto, con solo las correcciones de compilación 
 
 Los 8 fallos corresponden a CU3–CU9 (defecto D4) y a CU11 (defecto D3). Cada fallo se verificó
 contra la implementación para confirmar que la causa es el defecto y no un error del test. La
-tabla completa de resultados está en el apéndice de resultados (`resultados/unit-rojo.md`) y la
-captura en `capturas/unit-rojo.png`.
+tabla completa de resultados está en el apéndice de resultados (`resultados/unit-rojo.md`). La
+captura de esta ejecución es requerida y la toma el equipo desde el IDE (ver Apéndice B).
 
 No hay fase verde: por la regla del trabajo, el código de producción no se modifica (salvo D1 y
 D2, que impedían compilar), así que los defectos quedan registrados y sus casos permanecen en rojo
