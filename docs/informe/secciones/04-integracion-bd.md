@@ -147,7 +147,7 @@ el Javadoc los declara como precondición (`id > 0`, `limite > 0`).
 ## Resultados
 
 Ejecución del 31/10/2026 contra MySQL 8.0.40, sobre el código provisto con solo las correcciones
-de compilación D1 y D2 aplicadas (commit `d72f805`). Después, por indicación de la cátedra, esas
+de compilación D1 y D2 aplicadas (commit `c1ff2a6`). Después, por indicación de la cátedra, esas
 correcciones se revirtieron: con el código tal como se entregó **ninguna suite compila**, así que
 estos resultados son la evidencia de esa ejecución y no se pueden repetir sin corregir D1 y D2.
 
