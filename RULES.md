@@ -81,10 +81,12 @@ No se siembran fallas en el código fuente ni siquiera de forma temporal.
 - Sin coautoría ni atribución a Claude/Anthropic.
 - No se hace commit ni push salvo que se pida.
 
-## 8. Excepción única: bloqueadores de compilación
+## 8. Bloqueadores de compilación: tampoco se corrigen
 
-El código entregado no compilaba (`EnTallerState.java` declaraba `package model...` en lugar de
-`modelo...`, y `TrasladandoPacienteClinicasState.java` contenía la clase
-`TrasladandoPacienteClinicaState`). Por decisión del equipo se corrigieron ambos en un único
-commit acotado (`fix(ambulancia): ...`). **Es la única excepción** a la regla de no tocar el
-código fuente. Ambos se registran como defectos D1 y D2 del código provisto.
+El código entregado no compila (`EnTallerState.java` declara `package model...` en lugar de
+`modelo...`, y `TrasladandoPacienteClinicasState.java` contiene la clase
+`TrasladandoPacienteClinicaState`). Se habían corregido en el commit `c1ff2a6`, pero la cátedra
+indicó que el código no se toca en ningún caso, así que esa corrección se revirtió. Se registran
+como defectos D1 y D2. Mientras sigan sin corregirse, **ninguna suite compila ni se puede
+ejecutar**; los resultados ya obtenidos se conservan como evidencia de la fecha en que se
+corrieron.
