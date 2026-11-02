@@ -114,59 +114,69 @@ el Javadoc los declara como precondición (`id > 0`, `limite > 0`).
 
 ## Casos de prueba
 
-| Id | Operación y entrada | Resultado esperado | Resultado |
-|----|---------------------|--------------------|-----------|
-| CI1 | `getInstancia()` dos veces | La misma instancia | ✅ |
-| CI2 | Se borra el esquema y se crea el Singleton | `iniciarBD()` recrea `Grupo_7` | ✅ |
-| CI3 | Inicialización | La tabla tiene id y los siete atributos de SRS §3.1 | ✅ |
-| CI4 | Inicialización | 20 filas semilla, sin nulos, `numero` ≥ 0, DNI distintos | ✅ |
-| CI5 | `iniciarBD()` con una fila extra | Se recrea la tabla: vuelve a 20 filas | ✅ |
-| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S11) | ❌ D5 |
-| CI7 | `INSERT` propio sin DNI | `SQLException` (S12) | ❌ D6 |
-| CI8 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ |
-| CI9 | `guardar` con cada texto en su largo máximo | Se guarda completo | ✅ |
-| CI10–CI15 | `guardar` con nombre 31, apellido 31, DNI 11, calle 31, ciudad 36 o telefono 16 caracteres | `SQLException` y 20 filas (S10) | ✅ |
-| CI16 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` | ✅ |
-| CI17 | `guardar(null)` | `AssertionError` | ✅ |
-| CI18 | `cargar(1)` | DTO igual a la fila 1 | ❌ D7 |
-| CI19 | `cargar(20)` | DTO igual a la fila 20 | ❌ D7 |
-| CI20 | `cargar(21)` | `null` (S7) | ❌ D7 |
-| CI21 | `cargarConLimite(1)` | Solo la fila 1 | ✅ |
-| CI22 | `cargarConLimite(20)` | 20 elementos | ✅ |
-| CI23 | `cargarConLimite(21)` | 20 elementos | ✅ |
-| CI24 | `cargarBD()` | La tabla completa, cada DTO igual a su fila | ✅ |
-| CI25 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D8 |
-| CI26 | `actualizar` un DNI inexistente | Ninguna fila cambia (S8) | ❌ D8 |
-| CI27 | `eliminar` un DNI existente | 19 filas; el DNI ya no está | ✅ |
-| CI28 | `eliminar` un DNI inexistente | La tabla intacta (S8) | ✅ |
-| CI29 | `eliminar("")` | `AssertionError` (S9) | ✅ |
-| CI30 | `eliminar(null)` | `AssertionError` (S9) | ✅ |
-| CI31 | `cargarBD()` con una fila con `numero = 0` | 21 DTO, el último con `numero` 0 (SRS §3.1) | ❌ D3 |
-| CI32 | `cargarBD()` sin la tabla | `SQLException` hacia el llamador (Javadoc `@throws`) | ✅ |
+| Id | Operación y entrada | Resultado esperado | Rojo | Verde |
+|----|---------------------|--------------------|-----------|-------|
+| CI1 | `getInstancia()` dos veces | La misma instancia | ✅ | ✅ |
+| CI2 | Se borra el esquema y se crea el Singleton | `iniciarBD()` recrea `Grupo_7` | ✅ | ✅ |
+| CI3 | Inicialización | La tabla tiene id y los siete atributos de SRS §3.1 | ✅ | ✅ |
+| CI4 | Inicialización | 20 filas semilla, sin nulos, `numero` ≥ 0, DNI distintos | ✅ | ✅ |
+| CI5 | `iniciarBD()` con una fila extra | Se recrea la tabla: vuelve a 20 filas | ✅ | ✅ |
+| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S11) | ❌ D5 | ❌ D5 |
+| CI7 | `INSERT` propio sin DNI | `SQLException` (S12) | ❌ D6 | ❌ D6 |
+| CI8 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ | ✅ |
+| CI9 | `guardar` con cada texto en su largo máximo | Se guarda completo | ✅ | ✅ |
+| CI10–CI15 | `guardar` con nombre 31, apellido 31, DNI 11, calle 31, ciudad 36 o telefono 16 caracteres | `SQLException` y 20 filas (S10) | ✅ | ✅ |
+| CI16 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` | ✅ | ✅ |
+| CI17 | `guardar(null)` | `AssertionError` | ✅ | ✅ |
+| CI18 | `cargar(1)` | DTO igual a la fila 1 | ❌ D7 | ❌ D7 |
+| CI19 | `cargar(20)` | DTO igual a la fila 20 | ❌ D7 | ❌ D7 |
+| CI20 | `cargar(21)` | `null` (S7) | ❌ D7 | ❌ D7 |
+| CI21 | `cargarConLimite(1)` | Solo la fila 1 | ✅ | ✅ |
+| CI22 | `cargarConLimite(20)` | 20 elementos | ✅ | ✅ |
+| CI23 | `cargarConLimite(21)` | 20 elementos | ✅ | ✅ |
+| CI24 | `cargarBD()` | La tabla completa, cada DTO igual a su fila | ✅ | ✅ |
+| CI25 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D8 | ❌ D8 |
+| CI26 | `actualizar` un DNI inexistente | Ninguna fila cambia (S8) | ❌ D8 | ❌ D8 |
+| CI27 | `eliminar` un DNI existente | 19 filas; el DNI ya no está | ✅ | ✅ |
+| CI28 | `eliminar` un DNI inexistente | La tabla intacta (S8) | ✅ | ✅ |
+| CI29 | `eliminar("")` | `AssertionError` (S9) | ✅ | ✅ |
+| CI30 | `eliminar(null)` | `AssertionError` (S9) | ✅ | ✅ |
+| CI31 | `cargarBD()` con una fila con `numero = 0` | 21 DTO, el último con `numero` 0 (SRS §3.1) | ❌ D3 | ✅ |
+| CI32 | `cargarBD()` sin la tabla | `SQLException` hacia el llamador (Javadoc `@throws`) | ✅ | ✅ |
 
 ## Resultados
 
-Ejecución del 31/10/2026 contra MySQL 8.0.40, sobre el código provisto con solo las correcciones
-de compilación D1 y D2 aplicadas (commit `c1ff2a6`). Después, por indicación de la cátedra, esas
-correcciones se revirtieron: con el código tal como se entregó **ninguna suite compila**, así que
-estos resultados son la evidencia de esa ejecución y no se pueden repetir sin corregir D1 y D2.
+La suite se corrió contra un MySQL 8.0.40 real, antes y después de corregir `AsociadoDTO`:
 
-| Fase | Total | Pasan | Fallan |
-|------|-------|-------|--------|
-| Rojo (código provisto + D1/D2) | 32 | 24 | 8 |
+| Fase | Fecha | Código | Total | Pasan | Fallan |
+|------|-------|--------|-------|-------|--------|
+| Rojo | 31/10/2026 y 02/11/2026 | Como se entregó | 32 | 24 | 8 |
+| Verde | 02/11/2026 | `AsociadoDTO` corregido (D3 y D4) | 32 | 25 | 7 |
 
-Cada uno de los 8 fallos se verificó contra la implementación para confirmar que la causa es el
-defecto y no un error del test. No hay fase verde, porque el código de producción no se modifica.
+**En rojo** fallaron 8 casos, y cada uno se revisó contra el código para confirmar que la causa es
+un defecto y no un error del test. La corrida del 31/10 se repitió el 02/11 y dio exactamente lo
+mismo, así que el resultado es reproducible.
+
+**En verde** pasó CI31, el caso que fallaba por el defecto D3 de `AsociadoDTO`: una fila con
+`numero = 0` ahora se lee bien desde la base. Los otros 7 siguen fallando a propósito. Son los
+defectos D5 a D8, que están en `BaseDeDatos` y `DataAccessObject`, y la consigna no pide corregir
+esas clases: solo pide demostrar que la suite los detecta. Que sigan en rojo es justamente esa
+demostración. Ningún caso que pasaba en rojo dejó de pasar.
+
+Como el código entregado no compila (D1 y D2), las dos corridas se hicieron sobre una copia del
+proyecto con esos dos arreglos aplicados. La del 31/10 usó el commit `c1ff2a6`; las del 02/11 usaron
+una copia temporal que no se sube al repositorio (ver Apéndice C). Las tablas completas están en el
+Apéndice A (`resultados/integration-rojo.md` y `resultados/integration-verde.md`).
 
 ## Defectos detectados
 
-| Id | Ubicación | Descripción | Detectado por |
-|----|-----------|-------------|---------------|
-| D3 | `AsociadoDTO.setNumero` | Rechaza 0: una fila válida con `numero = 0` rompe `cargarBD()` al mapearla | CU11, CI31 |
-| D5 | `BaseDeDatos.getInstancia` | Después de `cerrarConexion()` sigue entregando el mismo manejador, con la conexión cerrada | CI6 |
-| D6 | `BaseDeDatos.iniciarBD` (esquema) | Ninguna columna es `NOT NULL`: la tabla acepta un asociado sin DNI | CI7 |
-| D7 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI18, CI19, CI20 |
-| D8 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI25, CI26 |
+| Id | Ubicación | Descripción | Detectado por | Estado |
+|----|-----------|-------------|---------------|--------|
+| D3 | `AsociadoDTO.setNumero` | Rechaza 0: una fila válida con `numero = 0` rompe `cargarBD()` al mapearla | CU11, CI31 | Corregido (`6cda0de`) |
+| D5 | `BaseDeDatos.getInstancia` | Después de `cerrarConexion()` sigue entregando el mismo manejador, con la conexión cerrada | CI6 | No se corrige |
+| D6 | `BaseDeDatos.iniciarBD` (esquema) | Ninguna columna es `NOT NULL`: la tabla acepta un asociado sin DNI | CI7 | No se corrige |
+| D7 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI18, CI19, CI20 | No se corrige |
+| D8 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI25, CI26 | No se corrige |
 
 D8 se manifiesta de dos maneras. En CI25 el `UPDATE` intenta poner en la fila 1 el DNI de la fila 7
 y MySQL lo rechaza por el `UNIQUE` (`Duplicate entry '22334455'`). En CI26, con un DNI nuevo, la
@@ -201,7 +211,9 @@ y la conexión cerrada (CI6).
 - La verificación con SQL propio fue determinante en D8: con un DNI nuevo, `actualizar` no lanza
   error y una lectura con el mismo DAO no habría mostrado que se pisó la fila 1.
 - CI31 muestra cómo un defecto unitario (D3) reaparece como error de mapeo en la integración: una
-  fila que la SRS considera válida hace fallar la carga completa de la tabla.
+  fila que la SRS considera válida hace fallar la carga completa de la tabla. Al corregir
+  `AsociadoDTO`, CI31 pasó a verde sin tocar nada de la persistencia: el problema estaba en el DTO,
+  y la integración lo mostraba de otra forma.
 - Los valores límite del esquema (CI9–CI15) pasaron: el motor protege los largos máximos. En cambio,
   el esquema no aplica las reglas de nulidad de la SRS (D6).
 - Limitaciones: la suite depende de que MySQL esté levantado con el usuario de `docker-compose.yml`,

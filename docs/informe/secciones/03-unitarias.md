@@ -95,60 +95,75 @@ caso inválido contiene una sola clase inválida, con el resto de los datos vál
 primer rechazo ocultaría a los demás. Cada caso es un método de prueba (por ejemplo,
 `testSetNumeroAcceptsZero` para CU11) cuyo comentario indica el Id del caso y las clases que cubre.
 
-| Id | Escenario | Método y entrada | Clases cubiertas | Resultado esperado | Resultado |
-|----|-----------|------------------|------------------|--------------------|-----------|
-| CU1 | E1 | `new AsociadoDTO()` | — | Getters: `null` en los `String`, `numero` = 0 (S6) | ✅ |
-| CU2 | — | Constructor con datos válidos y `numero` = 0 | V1–V7 (límite 0) | Cada getter devuelve su valor | ✅ |
-| CU3 | — | Constructor con `nombre` = `null` | I1 | `AssertionError` (S3) | ❌ D4 |
-| CU4 | — | Constructor con `apellido` = `null` | I2 | `AssertionError` (S3) | ❌ D4 |
-| CU5 | — | Constructor con `dni` = `null` | I3 | `AssertionError` (S3) | ❌ D4 |
-| CU6 | — | Constructor con `ciudad` = `null` | I4 | `AssertionError` (S3) | ❌ D4 |
-| CU7 | — | Constructor con `calle` = `null` | I5 | `AssertionError` (S3) | ❌ D4 |
-| CU8 | — | Constructor con `telefono` = `null` | I6 | `AssertionError` (S3) | ❌ D4 |
-| CU9 | — | Constructor con `numero` = −1 | I7 (límite −1) | `AssertionError` (S3) | ❌ D4 |
-| CU10 | E2 | Los seis setters `String` con texto distinto al de E2 | V8–V13 | Cada campo toma su valor; `numero` sin cambios | ✅ |
-| CU11 | E2 | `setNumero(0)` | V14 (límite 0) | `numero` = 0; resto sin cambios | ❌ D3 |
-| CU12 | E2 | `setNombre(null)` | I8 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU13 | E2 | `setApellido(null)` | I9 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU14 | E2 | `setDni(null)` | I10 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU15 | E2 | `setCiudad(null)` | I11 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU16 | E2 | `setCalle(null)` | I12 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU17 | E2 | `setTelefono(null)` | I13 | `AssertionError`; E2 sin cambios (S4) | ✅ |
-| CU18 | E2 | `setNumero(-1)` | I14 (límite −1) | `AssertionError`; E2 sin cambios (S4) | ✅ |
+| Id | Escenario | Método y entrada | Clases cubiertas | Resultado esperado | Rojo | Verde |
+|----|-----------|------------------|------------------|--------------------|-----------|-------|
+| CU1 | E1 | `new AsociadoDTO()` | — | Getters: `null` en los `String`, `numero` = 0 (S6) | ✅ | ✅ |
+| CU2 | — | Constructor con datos válidos y `numero` = 0 | V1–V7 (límite 0) | Cada getter devuelve su valor | ✅ | ✅ |
+| CU3 | — | Constructor con `nombre` = `null` | I1 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU4 | — | Constructor con `apellido` = `null` | I2 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU5 | — | Constructor con `dni` = `null` | I3 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU6 | — | Constructor con `ciudad` = `null` | I4 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU7 | — | Constructor con `calle` = `null` | I5 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU8 | — | Constructor con `telefono` = `null` | I6 | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU9 | — | Constructor con `numero` = −1 | I7 (límite −1) | `AssertionError` (S3) | ❌ D4 | ✅ |
+| CU10 | E2 | Los seis setters `String` con texto distinto al de E2 | V8–V13 | Cada campo toma su valor; `numero` sin cambios | ✅ | ✅ |
+| CU11 | E2 | `setNumero(0)` | V14 (límite 0) | `numero` = 0; resto sin cambios | ❌ D3 | ✅ |
+| CU12 | E2 | `setNombre(null)` | I8 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU13 | E2 | `setApellido(null)` | I9 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU14 | E2 | `setDni(null)` | I10 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU15 | E2 | `setCiudad(null)` | I11 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU16 | E2 | `setCalle(null)` | I12 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU17 | E2 | `setTelefono(null)` | I13 | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
+| CU18 | E2 | `setNumero(-1)` | I14 (límite −1) | `AssertionError`; E2 sin cambios (S4) | ✅ | ✅ |
 
 Los getters no reciben entradas: se verifican en todos los casos a través de `assertDatos`.
 
 ## Resultados
 
-Ejecución sobre el código provisto, con solo las correcciones de compilación D1 y D2 aplicadas
-(commit `c1ff2a6`), mediante `run_tests.sh unit rojo`:
+La suite se corrió dos veces: primero sobre el código tal como se entregó, para ver qué errores
+encuentra, y después sobre el código corregido, para confirmar que con los arreglos todo funciona.
 
-| Fase | Total | Pasan | Fallan |
-|------|-------|-------|--------|
-| Rojo (código provisto) | 18 | 10 | 8 |
+| Fase | Fecha | Código | Total | Pasan | Fallan |
+|------|-------|--------|-------|-------|--------|
+| Rojo | 25/10/2026 | `AsociadoDTO` como se entregó | 18 | 10 | 8 |
+| Verde | 02/11/2026 | `AsociadoDTO` corregido (D3 y D4) | 18 | 18 | 0 |
 
-Los 8 fallos corresponden a CU3–CU9 (defecto D4) y a CU11 (defecto D3). Cada fallo se verificó
-contra la implementación para confirmar que la causa es el defecto y no un error del test. La
-tabla completa de resultados está en el apéndice de resultados (`resultados/unit-rojo.md`). La
-captura de esta ejecución es requerida y la toma el equipo desde el IDE (ver Apéndice B).
+**En rojo** fallaron 8 casos. Siete (CU3 a CU9) muestran que el constructor acepta datos que la
+SRS prohíbe (defecto D4); el octavo (CU11) muestra que `setNumero` rechaza el 0, que la SRS
+permite (defecto D3). Antes de darlos por defectos se revisó el código de cada uno, para descartar
+que el error estuviera en el test.
 
-No hay fase verde: por la regla del trabajo, el código de producción no se modifica (salvo D1 y
-D2, que impedían compilar), así que los defectos quedan registrados y sus casos permanecen en rojo
-como evidencia de detección.
+**Corrección.** El punto 2 de la consigna pide "corregir si es necesario el código del ítem 1",
+es decir, `AsociadoDTO`. Por eso se corrigió esta clase, y solo esta:
+
+- D3: `setNumero` ahora acepta números mayores **o iguales** a 0 (antes exigía mayores a 0).
+- D4: el constructor ya no copia los datos directamente, sino que los pasa por los setters, así que
+  aplica las mismas validaciones que ellos.
+
+**En verde** pasaron los 18 casos. Además de los 8 que estaban en rojo, siguieron pasando los 10
+que ya pasaban, lo que muestra que la corrección no rompió nada de lo que funcionaba.
+
+Las dos corridas se hicieron con Maven y la opción `-ea`, y en las dos el proyecto tenía arreglados
+los dos errores que impiden compilar (D1 y D2). En la corrida en rojo ese arreglo todavía estaba
+en el repositorio (commit `c1ff2a6`). Después se revirtió, así que para la corrida en verde se
+repitió en una copia temporal del proyecto, que no se sube al repositorio (ver Apéndice C). Las tablas completas están en el
+Apéndice A (`resultados/unit-rojo.md` y `resultados/unit-verde.md`) y las capturas las toma el
+equipo desde el IDE (Apéndice B).
 
 ## Defectos detectados
 
-| Id | Ubicación | Descripción | Requisito violado | Detectado por |
-|----|-----------|-------------|-------------------|---------------|
-| D3 | `AsociadoDTO.setNumero` | Valida `numero > 0` en lugar de `numero >= 0`: rechaza el valor límite 0 | SRS §3.1: `numero` ≥ 0 | CU11 |
-| D4 | Constructor parametrizado | Asigna los siete campos sin validar: acepta `null` y `numero` negativo | SRS §3.1 (S3) | CU3–CU9 |
+| Id | Ubicación | Descripción | Requisito violado | Detectado por | Estado |
+|----|-----------|-------------|-------------------|---------------|--------|
+| D3 | `AsociadoDTO.setNumero` | Valida `numero > 0` en lugar de `numero >= 0`: rechaza el valor límite 0 | SRS §3.1: `numero` ≥ 0 | CU11 | Corregido (`6cda0de`) |
+| D4 | Constructor parametrizado | Asigna los siete campos sin validar: acepta `null` y `numero` negativo | SRS §3.1 (S3) | CU3–CU9 | Corregido (`aeb579f`) |
 
 El detalle (esperado, obtenido, severidad y estado) está en el registro de defectos.
 
 ## Fallas sembradas
 
-No se sembraron fallas: la regla del trabajo prohíbe modificar el código de producción, incluso de
-forma temporal. La capacidad de detección de la suite se demuestra con los defectos reales D3 y D4.
+No se sembraron fallas: fuera de la corrección que pide la consigna, el código de producción no se
+modifica, ni siquiera de forma temporal. La capacidad de detección de la suite se demuestra con los
+defectos reales D3 y D4: la suite los encontró en rojo y confirmó su corrección en verde.
 
 ## Conclusiones
 
@@ -159,6 +174,9 @@ forma temporal. La capacidad de detección de la suite se demuestra con los defe
   válida (por ejemplo `500`) no lo habría encontrado, lo que justifica elegir el valor límite como
   representante. D4 permite construir un `AsociadoDTO` que viola la SRS, eludiendo las
   validaciones de los setters.
+- Los dos defectos se corrigieron con cambios chicos y la suite pasó completa en verde. Que los 10
+  casos que ya pasaban siguieran pasando muestra que la suite también sirve para comprobar que una
+  corrección no rompe lo que ya funcionaba.
 - El supuesto S3 es determinante: D4 existe porque se asumió que las reglas de la SRS son del
   componente y no solo de sus setters. El supuesto S2 también condiciona el diseño: si la cátedra
   considera inválidos `""` o `"   "`, cada `String` tendría una clase inválida más.
