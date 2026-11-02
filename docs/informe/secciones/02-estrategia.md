@@ -19,11 +19,25 @@ especificación no define se documenta como supuesto en cada sección.
 
 ## Ciclo rojo / verde y fallas sembradas
 
-TODO: describir el procedimiento:
-1. Se ejecuta cada suite sobre el código original y se obtiene la evidencia en rojo.
-2. Se corrige cada defecto en un commit propio.
-3. Se ejecuta nuevamente y se obtiene la evidencia en verde.
-4. Se siembran fallas sobre el código corregido, para demostrar que la suite las detecta.
+Cada suite se corre al menos dos veces, y cada corrida muestra algo distinto:
+
+1. **Rojo: la suite encuentra los errores.** Primero se corre sobre el código tal como se entregó.
+   Cada caso que falla se revisa contra el código para confirmar que la causa es un defecto real y
+   no un error del test. Los defectos confirmados se anotan en el registro de defectos.
+2. **Corrección, solo donde la consigna lo pide.** El punto 2 de la consigna pide "corregir si es
+   necesario el código del ítem 1", así que se corrigen los defectos de `AsociadoDTO` (D3 y D4),
+   cada uno en su propio commit. El resto del código no se toca: sus defectos quedan registrados
+   y sus casos siguen en rojo, porque eso es lo que demuestra que la suite los detecta.
+3. **Verde: la corrección funciona y no rompe nada.** Se vuelve a correr la suite. Los casos de los
+   defectos corregidos pasan a verde, y los que ya pasaban tienen que seguir pasando.
+4. **Fallas introducidas desde los tests.** Como el resto del código no se modifica, para mostrar
+   que la suite detecta otros tipos de error se fuerzan situaciones desde el propio test: la base
+   de datos en estados especiales (tabla borrada, conexión cerrada) y dobles de prueba (mocks y
+   estados falsos) que se comportan mal a propósito.
+
+El código entregado no compila (D1 y D2) y esos defectos tampoco se corrigen. Para poder correr las
+pruebas, se aplica el arreglo en una copia temporal del proyecto que no se sube al repositorio
+(Apéndice C).
 
 ## Entorno y herramientas
 
