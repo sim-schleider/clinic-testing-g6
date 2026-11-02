@@ -4,11 +4,15 @@ Reglas del TP final de Calidad de Software (aplicación "Clínica"). Complementa
 `.skills/CONVENTIONS.md` y se subordinan a la consigna (`docs/Enunciado_Trabajo_final.md`).
 Si hay conflicto con otro documento del repo, rige este archivo.
 
-## 1. Alcance: solo testing
+## 1. Alcance: testing, más la corrección de `AsociadoDTO`
 
-- **No se modifica el código fuente.** Todo lo que está en `src/main/` queda tal como fue
-  entregado: no se corrigen defectos, no se renombran clases ni paquetes, no se refactoriza,
-  no se ajustan validaciones ni se tocan los `assert`.
+- **No se modifica el código fuente**, con una sola excepción. Todo lo que está en `src/main/`
+  queda tal como fue entregado: no se corrigen defectos, no se renombran clases ni paquetes, no se
+  refactoriza, no se ajustan validaciones ni se tocan los `assert`.
+- **Excepción: `src/main/java/persistencia/AsociadoDTO.java`.** El punto 2 de la consigna dice
+  "Corregir si es necesario el código del ítem 1", y el ítem 1 es `AsociadoDTO`. Sus defectos
+  (D3, D4) se corrigen, un commit `fix(persistencia): ...` por defecto, para tener la corrida en
+  verde. Ninguna otra clase entra en esta excepción.
 - El trabajo consiste únicamente en **diseñar, escribir y ejecutar pruebas** sobre lo
   desarrollado, y **documentar** los resultados.
 - Solo se escribe en:
@@ -16,7 +20,7 @@ Si hay conflicto con otro documento del repo, rige este archivo.
   - `docs/informe/` (informe, resultados, capturas),
   - archivos de soporte del entorno de pruebas (`docker-compose.yml`, scripts de
     `.skills/`), sin afectar el comportamiento de la aplicación.
-- Un defecto del código **no se corrige**: se **registra** en `docs/informe/secciones/07-defectos.md`
+- Fuera de esa excepción, un defecto del código **no se corrige**: se **registra** en `docs/informe/secciones/07-defectos.md`
   con estado `No se corrige: fuera de alcance (solo testing)` y se deja el test en rojo.
   Ese rojo es la evidencia que pide la consigna.
 
@@ -87,6 +91,7 @@ El código entregado no compila (`EnTallerState.java` declara `package model...`
 `modelo...`, y `TrasladandoPacienteClinicasState.java` contiene la clase
 `TrasladandoPacienteClinicaState`). Se habían corregido en el commit `c1ff2a6`, pero la cátedra
 indicó que el código no se toca en ningún caso, así que esa corrección se revirtió. Se registran
-como defectos D1 y D2. Mientras sigan sin corregirse, **ninguna suite compila ni se puede
-ejecutar**; los resultados ya obtenidos se conservan como evidencia de la fecha en que se
-corrieron.
+como defectos D1 y D2. Mientras sigan sin corregirse, **ninguna suite compila en el
+repositorio**. Para ejecutar las pruebas se aplica `c1ff2a6` en una copia temporal del proyecto
+(un `git worktree` fuera del repo) que nunca se commitea; el procedimiento está en el Apéndice C
+del informe (`docs/informe/secciones/92-apendice-entorno.md`).
