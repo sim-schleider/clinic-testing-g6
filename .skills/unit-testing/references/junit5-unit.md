@@ -20,8 +20,8 @@ package persistencia;
 @DisplayName("AsociadoDTO – pruebas unitarias")
 class AsociadoDTOTest {
 
-    // Without -ea the production asserts don't run: every "invalid input" case would report
-    // a defect that does not exist. Fail fast with a clear message instead.
+    // Without -ea the production asserts don't run: a precondition check that wrongly rejects a
+    // valid value (numero > 0 rejecting 0) would stay hidden. Fail fast with a clear message.
     @BeforeAll
     static void requiereAssertsHabilitados() {
         boolean habilitados = false;
@@ -63,22 +63,19 @@ class AsociadoDTOTest {
 
 `@Nested` classes show up as groups in IntelliJ and in the screenshots, one per scenario.
 
-## Rejection through `assert`
+## Inputs outside the domain
 
-```java
-@Test
-@DisplayName("CU7 – setNombre(null) se rechaza")
-void cu7_setNombreNuloRechazado() {
-    assertThrows(AssertionError.class, () -> dto.setNombre(null));
-}
-```
+Inputs that violate a precondition (for `AsociadoDTO`: `null` strings, negative `numero`) get
+**no test**. Do not write `assertThrows(AssertionError.class, () -> dto.setNombre(null))`: the
+contract promises nothing for that call.
 
-When the rejection is expected, also check that the object did not change. A validation that
+Only when the contract guarantees a rejection (`@throws`, or a `post:` covering the input) is
+there a test for it. Then also check that the object did not change, because a validation that
 throws only after assigning still corrupts the object:
 
 ```java
-assertThrows(AssertionError.class, () -> dto.setNumero(-1));
-assertEquals(1450, dto.getNumero(), "el valor previo no debe modificarse");
+assertThrows(IllegalArgumentException.class, () -> domicilio.setNumero(0));
+assertEquals(1450, domicilio.getNumero(), "el valor previo no debe modificarse");
 ```
 
 ## A setter changes only its own field
@@ -117,16 +114,9 @@ void numeroValido(String id, int numero) {
     dto.setNumero(numero);
     assertEquals(numero, dto.getNumero());
 }
-
-@ParameterizedTest(name = "{0} – setNumero({1}) se rechaza")
-@CsvSource({
-    "CU13, -1",
-    "CU14, -2147483648"
-})
-void numeroInvalido(String id, int numero) {
-    assertThrows(AssertionError.class, () -> dto.setNumero(numero));
-}
 ```
+
+There is no "se rechaza" counterpart for `numero < 0`: it is outside the domain.
 
 `null` in a `@CsvSource` needs `nullValues = "null"`. `@NullAndEmptySource` supplies `null` and
 `""` for a single-argument String test, but a test can't carry a different ID per row that way.
