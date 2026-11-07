@@ -1,13 +1,13 @@
 # Registro de defectos
 
-Defectos detectados por las suites, con el requisito u oráculo que violan y su estado final.
+Defectos detectados por las suites, con el requisito que violan y su estado final.
 
 Severidad:
 - **Alta**: impide la operación, pierde o corrompe datos, o produce un bloqueo.
 - **Media**: produce un resultado incorrecto con un rodeo posible.
 - **Baja**: inconsistencia sin efecto funcional inmediato.
 
-| ID | Componente | Descripción | Oráculo violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
+| ID | Componente | Descripción | Criterio de validación violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
 |----|------------|-------------|-----------------|---------------|----------|----------|-----------|--------|
 | D1 | `EnTallerState` | El archivo declara `package model.modeloDominio.ambulancia` pero está en `modelo/modeloDominio/ambulancia`: el proyecto no compila | Reglas del lenguaje Java (paquete = directorio); UML | Compilación (`mvn compile`) | El proyecto compila | `duplicate class`, `cannot find symbol Ambulancia` | Alta | No se corrige: fuera de alcance (solo testing). Se corrigió en c1ff2a6 y se revirtió |
 | D2 | `TrasladandoPacienteClinicaState` | La clase pública `TrasladandoPacienteClinicaState` está en el archivo `TrasladandoPacienteClinicasState.java` | Reglas del lenguaje Java (clase pública = nombre de archivo) | Compilación (`mvn compile`) | El proyecto compila | Error de compilación por nombre de archivo | Alta | No se corrige: fuera de alcance (solo testing). Se corrigió en c1ff2a6 y se revirtió |

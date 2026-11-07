@@ -12,9 +12,9 @@ se prueba en la integración con la base de datos.
 
 Suite: `src/test/java/item1/AsociadoDTOTest.java` (`@Tag("unit")`).
 
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 
-**Oráculo.** SRS §3.1, "Requisitos de Transferencia de Datos e Integridad":
+**Criterio de validación.** SRS §3.1, "Requisitos de Transferencia de Datos e Integridad":
 
 | Atributo | Tipo | Regla de validación |
 |----------|------|---------------------|

@@ -107,7 +107,7 @@ Create or update `docs/informe/secciones/03-unitarias.md` in Spanish, with these
 ```
 # Testing unitario de AsociadoDTO
 ## Objetivo y alcance
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 ## Diseño de escenarios
 ## Clases de equivalencia y valores límite
 ## Casos de prueba
@@ -117,7 +117,7 @@ Create or update `docs/informe/secciones/03-unitarias.md` in Spanish, with these
 ## Conclusiones
 ```
 
-"Oráculo y supuestos" states which restrictions are preconditions and why the inputs that violate
+"Criterio de validación y supuestos" states which restrictions are preconditions and why the inputs that violate
 them are not tested. The section is the formal design the assignment asks for, so it has to stand
 on its own: someone reading only the report should be able to follow why each case exists, and
 why there are no cases for the inputs outside the domain.

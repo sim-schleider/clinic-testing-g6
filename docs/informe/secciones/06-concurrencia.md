@@ -13,9 +13,9 @@ Suites (`@Tag("concurrency")`, sin mocks):
   reales.
 - `AmbulanciaConcurrencyTest` (CC6–CC13): hilos que compiten por la ambulancia.
 
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 
-**Oráculo.** La tabla de transiciones de la sección de mocks (UML y Javadoc), el contrato de
+**Criterio de validación.** La tabla de transiciones de la sección de mocks (UML y Javadoc), el contrato de
 `Ambulancia` (Javadoc), el Javadoc de `RetornoAutomatico` (*"periódicamente intenta retornar la
 ambulancia a la clínica mientras la simulación esté activa"*), y el informe de diseño, que dice que
 la ambulancia usa `synchronized` *"para que no los usen varios hilos a la vez"* y `wait()` *"para

@@ -19,4 +19,4 @@ TODO: qué se prueba en cada consigna y qué queda fuera de alcance (interfaz gr
 ## Documentación de referencia
 
 TODO: SRS del módulo de persistencia, enunciado, diagramas UML e informe de diseño de la aplicación,
-usados como oráculo de las pruebas.
+de los que salen los resultados esperados de las pruebas.

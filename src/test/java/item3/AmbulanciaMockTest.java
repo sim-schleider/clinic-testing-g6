@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 /**
  * Pruebas de Ambulancia con la interfaz State reemplazada por un mock, sin ningún estado concreto:
  * la ambulancia debe delegar en el estado actual el método que corresponde, una sola vez.
- * Oráculo: diagrama UML, Javadoc de Ambulancia e informe de diseño.
+ * Los resultados esperados salen del diagrama UML, el Javadoc de Ambulancia y el informe de diseño.
  */
 @Tag("mock")
 class AmbulanciaMockTest {

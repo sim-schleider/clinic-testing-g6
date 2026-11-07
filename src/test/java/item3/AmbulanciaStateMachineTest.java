@@ -25,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * públicos de Ambulancia. Después de cada paso se verifica el estado y el invariante de ocupación
  * (Javadoc de cada estado): la ambulancia está ocupada si y solo si está AtendiendoEnDomicilio,
  * TrasladandoPacienteClinica o EnTaller.
- * Oráculo: diagrama de estados (UML), Javadoc de cada estado e informe de diseño.
+ * Los resultados esperados salen del diagrama de estados (UML), el Javadoc de cada estado y el
+ * informe de diseño.
  */
 @Tag("concurrency")
 class AmbulanciaStateMachineTest {

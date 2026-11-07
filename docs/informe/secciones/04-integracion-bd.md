@@ -18,9 +18,9 @@ Suites (`@Tag("integration")`, paquete `item2`):
 - `support/DatabaseTestSupport`: utilidades de la suite (conexión propia y reinicio del
   Singleton). No contiene casos.
 
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 
-**Oráculo.** SRS §3.2 y §3.3:
+**Criterio de validación.** SRS §3.2 y §3.3:
 
 - *"El componente aplicará el patrón de diseño Singleton para restringir la instanciación a un
   único manejador de conexión activo durante toda la ejecución."*

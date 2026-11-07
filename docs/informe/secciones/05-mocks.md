@@ -18,9 +18,9 @@ Suites (`@Tag("mock")`, Mockito 5):
 Fuera de alcance: los casos en que la ambulancia está ocupada y la simulación activa, porque
 bloquean el hilo. Se prueban en la sección de concurrencia.
 
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 
-**Oráculo.** El diagrama UML de estados, el Javadoc de `Ambulancia` y de cada estado, y el informe
+**Criterio de validación.** El diagrama UML de estados, el Javadoc de `Ambulancia` y de cada estado, y el informe
 de diseño de la aplicación (`docs/Informe.md`), que dice que la ambulancia *"notifica a observadores
 cuando la ambulancia se encuentra en un estado en el que no puede cumplir una solicitud"*.
 

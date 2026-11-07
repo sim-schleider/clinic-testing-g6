@@ -93,7 +93,7 @@ Write the design into `docs/informe/secciones/05-mocks.md` in Spanish:
 ```
 # Testing con mocks: Ambulancia y la interfaz State
 ## Objetivo y alcance
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 ## Diseño: componentes reales y dobles de prueba
 ## Casos de prueba
 ### Ambulancia con State simulado

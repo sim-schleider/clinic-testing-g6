@@ -89,7 +89,7 @@ concatenates them in file-name order.
 
 Defect registry row (`07-defectos.md`):
 
-| ID | Componente | Descripción | Oráculo violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
+| ID | Componente | Descripción | Criterio de validación violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
 |----|------------|-------------|-----------------|---------------|----------|----------|-----------|--------|
 
 `Estado` is `Abierto`, `Corregido (<commit>)` or `No se corrige: <motivo>`. `Detectado por` lists

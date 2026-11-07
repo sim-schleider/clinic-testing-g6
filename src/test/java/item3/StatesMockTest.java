@@ -18,8 +18,9 @@ import static org.mockito.Mockito.*;
 
 /**
  * Pruebas de cada estado concreto con la Ambulancia reemplazada por un mock: una por cada celda de
- * la tabla de transiciones (6 estados × 4 eventos). Oráculo: diagrama UML, Javadoc de cada estado e
- * informe de diseño ("notifica a observadores cuando […] no puede cumplir una solicitud").
+ * la tabla de transiciones (6 estados × 4 eventos). Los resultados esperados salen del diagrama
+ * UML, el Javadoc de cada estado y el informe de diseño ("notifica a observadores cuando […] no
+ * puede cumplir una solicitud").
  */
 @Tag("mock")
 class StatesMockTest {

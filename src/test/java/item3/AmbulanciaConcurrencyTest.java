@@ -21,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pruebas de concurrencia de Ambulancia como recurso compartido (synchronized, wait/notifyAll,
- * RetornoAutomatico). Oráculo: Javadoc de Ambulancia y de RetornoAutomatico, e informe de diseño.
+ * RetornoAutomatico). Los resultados esperados salen del Javadoc de Ambulancia y de
+ * RetornoAutomatico, y del informe de diseño.
  * Nunca se espera un tiempo fijo: se espera una condición con un plazo máximo. Los hilos del test
  * son daemon, así un hilo bloqueado por un defecto no cuelga la ejecución.
  */
