@@ -1,6 +1,6 @@
 ---
 name: test-report
-description: Produce the deliverables of the testing assignment. Runs the suites and saves the red and green evidence (results tables), lists the screenshots the team must take, keeps the defect registry, writes the general sections of the informe (introducción, estrategia, conclusiones), generates the appendices, checks everything against the "Criterios de Entrega" and exports the informe to PDF. Use this whenever the user mentions the informe or report, "capturas en verde y en rojo", evidence, screenshots of test runs, "apéndice", "resultados", "registro de defectos", "conclusiones", exporting to PDF/Word, running a suite "para la entrega", or asks what is missing before submitting. Not for designing or writing the tests themselves (unit-testing, db-integration-testing, mock-testing, concurrency-testing), although those skills call its scripts to run suites.
+description: Produce the deliverables of the testing assignment. Runs each suite once and saves the evidence (results tables of passing and failing tests), lists the screenshots the team must take, keeps the defect registry, writes the general sections of the informe (introducción, estrategia, conclusiones), generates the appendices, checks everything against the "Criterios de Entrega" and exports the informe to PDF. Use this whenever the user mentions the informe or report, "capturas en verde y en rojo", evidence, screenshots of test runs, "apéndice", "resultados", "registro de defectos", "conclusiones", exporting to PDF/Word, running a suite "para la entrega", or asks what is missing before submitting. Not for designing or writing the tests themselves (unit-testing, db-integration-testing, mock-testing, concurrency-testing), although those skills call its scripts to run suites.
 ---
 
 # Test report: evidence, informe and delivery check
@@ -24,7 +24,7 @@ All of them run from the project root:
 
 | Script | Does |
 |--------|------|
-| `scripts/run_tests.sh <suite> <fase> [--no-run] [-- mvn args]` | Runs a suite (unit, integration, mock, concurrency, all). For `rojo`/`verde` it saves `resultados/<suite>-<fase>.{log,md}`; `dev` only prints |
+| `scripts/run_tests.sh <suite> [--dev] [--no-run] [-- mvn args]` | Runs a suite (unit, integration, mock, concurrency, all) and saves `resultados/<suite>.{log,md}`; `--dev` only prints |
 | `scripts/surefire_summary.py` | Surefire XML → results table with case IDs, date and commit (called by `run_tests.sh`) |
 | `scripts/build_appendix.py` | Regenerates appendices A (results), B (screenshots taken by the team, and the ones still required) and D (test code) |
 | `scripts/check_report.py` | Delivery checklist; exits 1 if something blocks the delivery |
@@ -59,36 +59,36 @@ All of them run from the project root:
 
 The evidence is only worth something if it is honest:
 
-- **`rojo`** runs on the **original** code. Only the build fixes may be applied, and no seeded
-  fault. The summary header records the commit and whether `src/main` had uncommitted changes.
-  `check_report.py` rejects evidence taken with uncommitted production changes.
-- **`verde`** runs after the approved fixes are **committed**.
+- Each suite runs **once**, on the code of its item's branch as committed. Only the build fixes
+  may be applied (in a temporary copy), and no seeded fault. The summary header records the
+  commit and whether `src/main` had uncommitted changes; `check_report.py` rejects evidence
+  taken with uncommitted production changes.
+- There are no "before/after" phases: the run shows which tests pass and which fail, and every
+  failing test points to a defect in the registry.
 - Run each suite separately (`unit`, `integration`, `mock`, `concurrency`), so each result
   table and each screenshot covers one assignment item.
 
 ```bash
-.skills/test-report/scripts/run_tests.sh unit rojo
-# ... the user approves fixes, one commit each ...
-.skills/test-report/scripts/run_tests.sh unit verde
+.skills/test-report/scripts/run_tests.sh unit
 ```
 
 If Maven can't run here (no Java in WSL, and Docker without WSL integration), the user runs
 `mvn test -Dgroups=unit` from IntelliJ's Maven panel. Then summarize with
-`run_tests.sh unit rojo --no-run`.
+`run_tests.sh unit --no-run`.
 
 **Screenshots are never produced here.** Don't render, generate or fake them (no HTML panels,
 no headless browser, no images built from the results table): only a real screenshot of the
-IDE counts as evidence, and taking it is the team's job. For each `rojo`/`verde` run:
+IDE counts as evidence, and taking it is the team's job. For each run:
 
 1. Tell the user which screenshot is now required: the JUnit results panel in IntelliJ for that
-   suite and phase, saved as `docs/informe/capturas/<suite>-<fase>.png`.
+   suite, saved as `docs/informe/capturas/<suite>.png`.
 2. Leave the request written in the informe: `build_appendix.py` turns every missing screenshot
    into a row of the "Capturas requeridas" table in Apéndice B, and shows the ones that exist.
 3. In the testing sections, refer to the screenshot by pointing to Apéndice B, never as if it
    already existed.
 
-A test still red in `verde` must be explained: either an open defect, or one that won't be fixed
-and why. Don't hide it.
+Every failing test must be explained: an open defect, or one that won't be fixed and why.
+Don't hide it.
 
 ### 3. Keep the defect registry consistent
 
@@ -104,7 +104,7 @@ Severity criteria are at the top of the template.
 Read `references/report-structure.md` for the content of each section and the writing guidelines.
 
 - `01-introduccion.md` and `02-estrategia.md`: objective, system under test, scope, levels,
-  oracle, red/green cycle, environment, conventions.
+  oracle, how the suites are run, environment, conventions.
 - `08-conclusiones.md`: write it **last**, from the actual numbers in the results and in the
   registry.
 - `92-apendice-entorno.md`: environment adjustments that were needed.
@@ -139,7 +139,7 @@ https://docs.google.com/document/d/13xLZ_v2hmLqQIIREEyYeLQkdsPMo5rQ6rHuUes3aQwM/
   ask the user to share the doc with that account (as editor) and stop; don't fall back to
   creating another document.
 - Screenshots are pasted into the doc by the team. Leave a placeholder line
-  `[Captura requerida: <suite>-<fase>.png]` where each one goes and tell the user.
+  `[Captura requerida: <suite>.png]` where each one goes and tell the user.
 
 ### 5. Generate the appendices
 
@@ -159,7 +159,7 @@ python3 -I .skills/test-report/scripts/check_report.py
 Fix every ❌, and resolve or justify every ⚠. Common fixes:
 - a designed case was never run: write the test, or remove the row and explain why;
 - a test has no design row: add the row;
-- red evidence shows no failures: the suite doesn't demonstrate detection, so review it with the
+- a suite has no failing tests: it doesn't demonstrate detection, so review it with the
   corresponding testing skill.
 
 ### 7. Export and review
@@ -183,7 +183,7 @@ Only then report the delivery as ready.
   produce.
 - Generate, render or edit a screenshot, or present one as taken when it isn't. Screenshots come
   only from the team.
-- Label a run on modified code (seeded faults, uncommitted fixes) as `rojo` original or `verde`.
+- Present a run on modified code (seeded faults, uncommitted fixes) as the evidence of the repository's code.
 - Invent carátula data, results, defects or conclusions that the evidence doesn't support.
 - Write the conclusions before the evidence exists.
 - Overwrite a section that a testing skill owns (03–06), except to fix formatting with the user's

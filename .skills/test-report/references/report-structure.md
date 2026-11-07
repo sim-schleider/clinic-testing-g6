@@ -38,13 +38,13 @@ Appendices carry `{.unnumbered}`.
 - the table of levels (component, resource, technique, assignment item), and why each item is
   tested at that level;
 - the oracle rule: the specification, not the code, and how supuestos are handled;
-- the red/green cycle and fault seeding, explained as the method for "demostrar que la suite
-  detecta los fallos";
+- how each suite is run (once, on the code of its item, showing which tests pass and which
+  fail) and fault seeding, explained as the method for "demostrar que la suite detecta los fallos";
 - the environment and the ID conventions.
 
 **Conclusiones** (written last, from the evidence):
 1. A summary table:
-   `Suite | Casos | Fallidos en rojo | Fallidos en verde | Defectos | Fallas sembradas detectadas`.
+   `Suite | Casos | Pasan | Fallan | Defectos | Fallas sembradas detectadas`.
 2. Effectiveness: which level found which kind of defect, and why another level would have
    missed it. This is the core argument of a *testing strategy*.
 3. Limitations: what a green suite doesn't guarantee, the supuestos taken, and what was found

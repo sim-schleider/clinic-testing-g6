@@ -6,10 +6,10 @@ description: Design, write and run isolated unit tests (JUnit 5) for a single Ja
 # Unit testing: equivalence classes and boundary values
 
 For one class this skill produces: the equivalence-class and boundary-value table, the case
-table, a JUnit 5 test class, the red/green results, the defects found, and the report section
+table, a JUnit 5 test class, the results of its run, the defects found, and the report section
 `docs/informe/secciones/03-unitarias.md` with all of it written up in Spanish.
 
-The project conventions (IDs, tags, red/green cycle, report layout) are in `.skills/CONVENTIONS.md`.
+The project conventions (IDs, tags, how suites are run, report layout) are in `.skills/CONVENTIONS.md`.
 
 ## Why the procedure is shaped this way
 
@@ -127,7 +127,7 @@ why there are no cases for the inputs outside the domain.
 Read `references/junit5-unit.md` for the class skeleton, the `-ea` guard, parameterized rows with
 IDs, and the assertion patterns.
 
-- `<Clase>Test` in the same package as the class, with `@Tag("unit")`.
+- `<Clase>Test` in package `item1` (one package per assignment item), with `@Tag("unit")`.
 - One method per case (`cu3_numeroCeroValido`) with `@DisplayName("CU3 – ...")`. Homogeneous rows
   can share a `@ParameterizedTest` whose first argument is the case ID.
 - Observe results only through the public API. Check **all** getters after a setter, not just
@@ -138,11 +138,12 @@ IDs, and the assertion patterns.
 ### 7. Run
 
 ```bash
-.skills/test-report/scripts/run_tests.sh unit dev    # while iterating
-.skills/test-report/scripts/run_tests.sh unit rojo   # evidence: original code
+.skills/test-report/scripts/run_tests.sh unit --dev   # while iterating
+.skills/test-report/scripts/run_tests.sh unit         # evidence: one run, saved
 ```
 
-Use `rojo` only on the original code, with nothing but the build fixes applied. If the build
+Run the evidence once, on the committed code of the item's branch, with nothing but the build
+fixes applied (in a temporary copy). If the build
 does not compile, see the "Known build blocker" note in `.skills/CONVENTIONS.md`.
 
 ### 8. Analyze every red
@@ -156,13 +157,12 @@ For each failing test:
 4. Fill in the `Resultado` column of the case table.
 
 Do not change production code or the test to turn a red green. Propose the fix to the user, and
-only after they approve it apply it as its own commit (`fix(persistencia): ...`). Then run
-`verde`.
+only after they approve it apply it as its own commit (`fix(persistencia): ...`).
 
 ### 9. Seed faults (after green)
 
 This is the proof that the suite detects faults. On the green code, introduce **one fault at a
-time** in the class under test, run `run_tests.sh unit dev`, record which case caught it, and
+time** in the class under test, run `run_tests.sh unit --dev`, record which case caught it, and
 restore the file with `git checkout -- <file>`. Good faults for a DTO are the ones that break
 the contract for inputs inside the domain:
 
@@ -184,7 +184,7 @@ IDs are `FU1…`. A fault nobody catches means a missing case: add the case and 
 
 ### 10. Write results and conclusions
 
-Fill in "Resultados": counts in red and green, and a pointer to the results appendix and to
+Fill in "Resultados": how many tests pass and how many fail, and a pointer to the results appendix and to
 Apéndice B, where the screenshots the team takes go. "Conclusiones" should cover:
 
 - what the suite proved,

@@ -84,7 +84,7 @@ public class AsociadoDTO implements Serializable {
         return numero;
     }
     public void setNumero(int numero) {
-        assert numero > 0;
+        assert numero >= 0;
         this.numero = numero;
     }
     public String getTelefono() {

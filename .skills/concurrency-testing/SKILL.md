@@ -10,7 +10,7 @@ This skill produces:
 - the concurrency scenarios,
 - the case table,
 - JUnit 5 tests with real threads,
-- red/green results, the defects found and the seeded faults,
+- the results of the run, the defects found and the seeded faults,
 - the report section `docs/informe/secciones/06-concurrencia.md`, written in Spanish.
 
 The project conventions are in `.skills/CONVENTIONS.md`.
@@ -137,7 +137,7 @@ threads that capture their exceptions, thread dumps, deadlock detection and clea
 
 - Use `AmbulanciaStateMachineTest` (single-threaded flows) and `AmbulanciaConcurrencyTest` /
   `RetornoAutomaticoConcurrencyTest` (threads), all with `@Tag("concurrency")`, in package
-  `modelo.modeloDominio.ambulancia`.
+  `item3`.
 - One method per case (`cc4_segundoPedidoEsperaHastaLiberar`) with `@DisplayName("CC4 – ...")`.
 - Put `@Timeout` on every test, chosen from the real intervals. `RetornoAutomatico` waits 10 s,
   so its tests need about 15–25 s, and the others about 5 s.
@@ -147,8 +147,8 @@ threads that capture their exceptions, thread dumps, deadlock detection and clea
 ### 5. Run
 
 ```bash
-.skills/test-report/scripts/run_tests.sh concurrency dev
-.skills/test-report/scripts/run_tests.sh concurrency rojo
+.skills/test-report/scripts/run_tests.sh concurrency --dev   # while iterating
+.skills/test-report/scripts/run_tests.sh concurrency         # evidence: one run, saved
 ```
 
 Run racy tests repeatedly before trusting a green: `@RepeatedTest(20)`, or several runs.
@@ -164,12 +164,12 @@ Run racy tests repeatedly before trusting a green: `@RepeatedTest(20)`, or sever
    flag not reset, a wrong transition, an inverted loop guard.
 4. Register the defect in `07-defectos.md` citing the oracle row.
 
-Propose fixes; apply them only with the user's OK, one commit each. Then run `verde`, repeated.
+Propose fixes; apply them only with the user's OK, one commit each.
 
 ### 7. Seed faults (after green)
 
 This is the part the assignment explicitly asks to demonstrate. On the green code, seed **one
-fault at a time**, run `concurrency dev` (repeat it for racy faults), record the result, then
+fault at a time**, run `concurrency --dev` (repeat it for racy faults), record the result, then
 restore with `git checkout`. The catalogue is in `references/concurrency-patterns.md` §6. It
 includes:
 - removing `synchronized`;
@@ -184,7 +184,7 @@ Record them in "Fallas sembradas" with IDs `FC1…`, adding a detection rate col
 
 ### 8. Results and conclusions
 
-"Resultados" gives the counts for red and green, the repetitions, and a pointer to the appendix.
+"Resultados" gives how many tests pass and how many fail, the repetitions, and a pointer to the appendix.
 "Conclusiones" covers:
 - which synchronization and state defects were found;
 - how each was detected (hang, invariant, transition);

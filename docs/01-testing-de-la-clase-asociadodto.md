@@ -59,36 +59,20 @@ el constructor y para cada setter) quedan fuera del dominio por precondición.
 
 | Qué | Dónde |
 |-----|-------|
-| Suite de 4 casos (CU1–CU4), solo clases válidas y el valor límite 0 | `src/test/java/persistencia/AsociadoDTOTest.java` |
+| Suite de 4 casos (CU1–CU4), solo clases válidas y el valor límite 0 | `src/test/java/item1/AsociadoDTOTest.java` |
 | Sección del informe (oráculo con precondiciones, supuestos S1–S3, clases V1–V14, casos, resultados, conclusiones) | `docs/informe/secciones/03-unitarias.md` |
 | Defecto D3 (`setNumero` rechaza 0) | `docs/informe/secciones/07-defectos.md` |
-| Ejecución en rojo | `docs/informe/resultados/unit-rojo.md` y `.log`: **desactualizados**, todavía tienen los 18 casos |
-| Captura en rojo | Pendiente, la toma el equipo desde el IDE (Apéndice B) |
+| Ejecución | `docs/informe/resultados/unit.{md,log}`: **pendiente**, se genera con `run_tests.sh unit` |
+| Captura | Pendiente, la toma el equipo desde el IDE (Apéndice B) |
 
 ## Qué falta
 
-1. **Volver a correr la suite en rojo** con `run_tests.sh unit rojo` para regenerar
-   `resultados/unit-rojo.{md,log}`. Resultado esperado: 4 casos, 3 pasan y 1 falla (CU4, por D3).
-   Los números que figuran hoy en la sección salen de la corrida del 25/10, en la que estos cuatro
-   métodos tenían el mismo código. Al regenerar, sacar el comentario `PENDIENTE` de
-   `03-unitarias.md`.
-2. **Tomar la captura en rojo** de esa corrida.
-3. **Decidir si se corrige D3** ("corregir si es necesario el código del ítem 1", al principio del
-   punto 2 de la consigna):
-   - **Opción A:** no se corrige. D3 queda en rojo como evidencia y el informe explica por qué no
-     hay fase verde.
-   - **Opción B:** se corrige D3 en su propio commit (`fix(persistencia): accept zero in
-     AsociadoDTO.setNumero`), se corre `verde` y se toma la captura en verde. En el branch
-     `test/item-2-db-integration` ya existe ese arreglo (`6cda0de`). El otro arreglo de ese branch,
-     el del constructor (`aeb579f`), ya no hace falta.
+1. **Correr la suite** con `run_tests.sh unit` sobre el código de master (el `AsociadoDTO`
+   entregado) para generar `resultados/unit.{md,log}`. Resultado esperado: 4 casos, 3 pasan y 1
+   falla (CU4, por D3). Al generarlo, sacar el comentario `PENDIENTE` de `03-unitarias.md`.
+2. **Tomar la captura** de esa corrida: muestra CU1–CU3 en verde y CU4 en rojo.
+3. **D3 se corrige en el punto 2** ("corregir si es necesario el código del ítem 1"), en el branch
+   `test/item-2-db-integration` (`6cda0de`). No hay una corrida "antes y después": cada suite se
+   ejecuta una vez sobre el código de su punto.
 4. **Revisar el apéndice de resultados.** Cuando se genere `90-apendice-resultados.md` (lo arma
    el script de `test-report`), verificar que aparezcan los 4 casos con su ID.
-
-## Qué escribir en el informe
-
-La sección `03-unitarias.md` ya está actualizada con el criterio de precondiciones. Solo hay que:
-
-- si se elige la opción B, agregar una fila "Verde (código corregido)" a la tabla de resultados,
-  citar el commit de la corrección y actualizar el estado de D3 en el registro de defectos;
-- si se elige la opción A, dejarla como está y asegurarse de que la conclusión general (sección 8)
-  explique por qué no hay fase verde.

@@ -17,13 +17,28 @@ TODO: el resultado esperado de cada caso surge de la especificación (SRS, enunc
 contratos Javadoc e informe de diseño), nunca del comportamiento actual del código. Lo que la
 especificación no define se documenta como supuesto en cada sección.
 
-## Ciclo rojo / verde y fallas sembradas
+## Ejecución de las suites y fallas sembradas
 
-TODO: describir el procedimiento:
-1. Se ejecuta cada suite sobre el código original y se obtiene la evidencia en rojo.
-2. Se corrige cada defecto en un commit propio.
-3. Se ejecuta nuevamente y se obtiene la evidencia en verde.
-4. Se siembran fallas sobre el código corregido, para demostrar que la suite las detecta.
+Cada suite se ejecuta una vez, sobre el código de su punto de la consigna, y su resultado muestra
+qué casos pasan (verde, funcionamiento correcto) y cuáles fallan (rojo, detección de un error):
+
+1. **Ejecución.** Cada caso que falla se revisa contra el código para confirmar que la causa es un
+   defecto real y no un error del test. Los defectos confirmados se anotan en el registro de
+   defectos, con el caso que los detecta.
+2. **Corrección, solo donde la consigna lo pide.** El punto 2 de la consigna pide "corregir si es
+   necesario el código del ítem 1", así que se corrige el defecto D3 de `AsociadoDTO`, en su propio
+   commit. Por eso la suite unitaria (punto 1) se ejecuta sobre el código entregado, donde CU4
+   detecta D3, y la de integración (punto 2) sobre el código con D3 corregido. El resto del código
+   no se toca: sus defectos quedan registrados y sus casos fallan, porque eso es lo que demuestra
+   que la suite los detecta.
+3. **Fallas introducidas desde los tests.** Como el resto del código no se modifica, para mostrar
+   que la suite detecta otros tipos de error se fuerzan situaciones desde el propio test: la base
+   de datos en estados especiales (tabla borrada, conexión cerrada) y dobles de prueba (mocks y
+   estados falsos) que se comportan mal a propósito.
+
+El código entregado no compila (D1 y D2) y esos defectos tampoco se corrigen. Para poder correr las
+pruebas, se aplica el arreglo en una copia temporal del proyecto que no se sube al repositorio
+(Apéndice C).
 
 ## Entorno y herramientas
 
