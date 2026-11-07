@@ -17,20 +17,21 @@ TODO: el resultado esperado de cada caso surge de la especificación (SRS, enunc
 contratos Javadoc e informe de diseño), nunca del comportamiento actual del código. Lo que la
 especificación no define se documenta como supuesto en cada sección.
 
-## Ciclo rojo / verde y fallas sembradas
+## Ejecución de las suites y fallas sembradas
 
-Cada suite se corre al menos dos veces, y cada corrida muestra algo distinto:
+Cada suite se ejecuta una vez, sobre el código de su punto de la consigna, y su resultado muestra
+qué casos pasan (verde, funcionamiento correcto) y cuáles fallan (rojo, detección de un error):
 
-1. **Rojo: la suite encuentra los errores.** Primero se corre sobre el código tal como se entregó.
-   Cada caso que falla se revisa contra el código para confirmar que la causa es un defecto real y
-   no un error del test. Los defectos confirmados se anotan en el registro de defectos.
+1. **Ejecución.** Cada caso que falla se revisa contra el código para confirmar que la causa es un
+   defecto real y no un error del test. Los defectos confirmados se anotan en el registro de
+   defectos, con el caso que los detecta.
 2. **Corrección, solo donde la consigna lo pide.** El punto 2 de la consigna pide "corregir si es
-   necesario el código del ítem 1", así que se corrigen los defectos de `AsociadoDTO` (D3 y D4),
-   cada uno en su propio commit. El resto del código no se toca: sus defectos quedan registrados
-   y sus casos siguen en rojo, porque eso es lo que demuestra que la suite los detecta.
-3. **Verde: la corrección funciona y no rompe nada.** Se vuelve a correr la suite. Los casos de los
-   defectos corregidos pasan a verde, y los que ya pasaban tienen que seguir pasando.
-4. **Fallas introducidas desde los tests.** Como el resto del código no se modifica, para mostrar
+   necesario el código del ítem 1", así que se corrige el defecto D3 de `AsociadoDTO`, en su propio
+   commit. Por eso la suite unitaria (punto 1) se ejecuta sobre el código entregado, donde CU4
+   detecta D3, y la de integración (punto 2) sobre el código con D3 corregido. El resto del código
+   no se toca: sus defectos quedan registrados y sus casos fallan, porque eso es lo que demuestra
+   que la suite los detecta.
+3. **Fallas introducidas desde los tests.** Como el resto del código no se modifica, para mostrar
    que la suite detecta otros tipos de error se fuerzan situaciones desde el propio test: la base
    de datos en estados especiales (tabla borrada, conexión cerrada) y dobles de prueba (mocks y
    estados falsos) que se comportan mal a propósito.

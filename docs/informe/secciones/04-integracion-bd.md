@@ -2,19 +2,21 @@
 
 ## Objetivo y alcance
 
-Verificar la comunicación real entre `AsociadoDTO`, `DataAccessObject`, `BaseDeDatos` y el motor
-MySQL (ítem 2 de la consigna): el patrón Singleton de la conexión, la creación automática del
-esquema, de la tabla y de los datos semilla, y las operaciones CRUD con consultas parametrizadas.
-Además, demostrar que la suite atrapa excepciones de SQL, errores de mapeo e inconsistencias del
-código provisto.
+Verificar la comunicación entre `AsociadoDTO`, `DataAccessObject`, `BaseDeDatos` y el motor MySQL
+(ítem 2 de la consigna): el patrón Singleton de la conexión, la creación automática del esquema,
+de la tabla y de los datos semilla, y las operaciones CRUD con consultas parametrizadas. Además,
+demostrar que la suite atrapa excepciones de SQL, errores de mapeo e inconsistencias del código
+provisto.
 
 Fuera de alcance: la vista y el controlador, que solo invocan al DAO.
 
-Suites (`@Tag("integration")`):
+Suites (`@Tag("integration")`, paquete `item2`):
 
-- `BaseDeDatosIntegrationTest`: Singleton, esquema, tabla y datos semilla (CI1–CI7).
-- `DataAccessObjectIntegrationTest`: CRUD, valores límite, errores de SQL y de mapeo (CI8–CI32).
-- `BaseDeDatosDePrueba`: utilidades de la suite (conexión propia y reinicio del Singleton).
+- `DatabaseIntegrationTest`: Singleton, esquema, tabla y datos semilla (CI1–CI6).
+- `DataAccessObjectIntegrationTest`: CRUD, consultas parametrizadas, errores de SQL y de mapeo
+  (CI7–CI22).
+- `support/DatabaseTestSupport`: utilidades de la suite (conexión propia y reinicio del
+  Singleton). No contiene casos.
 
 ## Oráculo y supuestos
 
@@ -33,26 +35,38 @@ Suites (`@Tag("integration")`):
 - *"El sistema modificará registros existentes o eliminará entradas basándose en criterios únicos
   como el número de documento (DNI)."*
 
-Se suman las reglas de SRS §3.1 (ningún campo nulo, `numero` ≥ 0, el DNI es identificador único) y
-los contratos Javadoc de cada método (`pre`, `post` y `@throws SQLException`).
+Se suman las reglas de SRS §3.1 (ningún campo nulo, `numero` ≥ 0, el DNI es identificador único),
+el uso de `PreparedStatement` "para prevenir vulnerabilidades de inyección SQL" (SRS §3.2) y los
+contratos Javadoc de cada método (`pre`, `post` y `@throws SQLException`).
+
+**Dónde se prueba cada cosa.** La SRS §3.2 le asigna a `BaseDeDatos` la conexión, el Singleton y la
+rutina `iniciarBD()`; eso se prueba directamente sobre `BaseDeDatos`. La SRS §3.3 define al DAO
+como el componente que "expone los servicios de persistencia a la lógica de la aplicación", así que
+el CRUD se prueba a través del DAO. Los métodos `ejecutarInsert`, `ejecutarConsulta`,
+`ejecutarActualizacion` y `ejecutarDelete` de `BaseDeDatos` se ejercitan igual, porque el DAO los
+llama.
+
+**Precondiciones.** Con el mismo criterio que el ítem 1, las reglas de validación de la SRS y los
+`pre:` del Javadoc son precondiciones, y las entradas que las violan no se prueban: `guardar(null)`
+y `actualizar(null)` (`pre: asociado no debe ser nulo`), `cargar(0)` (`pre: id > 0`),
+`cargarConLimite(0)` (`pre: limite > 0`) y un DNI vacío o nulo en `eliminar` (el DNI "no puede ser
+nulo", SRS §3.1). La SRS dice que el guardado "validará que no sea nula" la entidad, pero el
+Javadoc lo declara como precondición; se sigue el criterio de la cátedra y no se prueba.
 
 **Supuestos** (lo que la especificación no dice):
 
 | Id | Supuesto | Justificación |
 |----|----------|---------------|
-| S7 | `cargar` con un id inexistente devuelve `null` | El Javadoc solo describe el caso existente |
-| S8 | `actualizar` y `eliminar` con un DNI inexistente no lanzan excepción y no cambian ninguna fila | Comportamiento habitual de un `UPDATE`/`DELETE` sin coincidencias |
-| S9 | `eliminar("")` y `eliminar(null)` se rechazan con `AssertionError` | Mismo criterio que el ítem 1: un DNI vacío o nulo es inválido (SRS §3.1) |
-| S10 | Un texto más largo que su columna produce `SQLException` | MySQL 8 trabaja en modo estricto por defecto |
-| S11 | Después de `cerrarConexion()`, `getInstancia()` entrega una conexión usable | SRS §3.2: "un único manejador de conexión **activo**" |
-| S12 | La tabla debe rechazar un asociado sin DNI | SRS §3.1: el DNI "no puede ser nulo; actúa como identificador único" |
-| S13 | Las cargas devuelven las filas en el orden del id | La SRS no define un orden; InnoDB devuelve por clave primaria |
+| S4 | `cargar` con un id inexistente devuelve `null` | El Javadoc solo describe el caso existente |
+| S5 | `actualizar` y `eliminar` con un DNI inexistente no lanzan excepción y no cambian ninguna fila | Comportamiento habitual de un `UPDATE`/`DELETE` sin coincidencias |
+| S6 | Después de `cerrarConexion()`, `getInstancia()` entrega una conexión usable | SRS §3.2: "un único manejador de conexión **activo**" |
+| S7 | Las cargas devuelven las filas en el orden del id | La SRS no define un orden; InnoDB devuelve por clave primaria |
 
 ## Estrategia de integración
 
 | Componente | Real / Mock | Motivo |
 |------------|-------------|--------|
-| MySQL 8 | Real | La consigna exige comunicación real con el motor |
+| MySQL 8 | Real | La consigna pide verificar la comunicación con el motor |
 | `BaseDeDatos` | Real | Componente bajo prueba |
 | `DataAccessObject` | Real | Componente bajo prueba |
 | `AsociadoDTO` | Real | Atraviesa la integración (mapeo) |
@@ -63,10 +77,12 @@ los contratos Javadoc de cada método (`pre`, `post` y `@throws SQLException`).
   justamente los errores de SQL y de mapeo que la consigna pide encontrar.
 - **Verificación independiente.** Toda escritura se comprueba con una conexión JDBC propia del test
   y SQL propio, nunca leyendo con el mismo DAO. Si `guardar` pusiera la calle en la columna de la
-  ciudad y `cargar` la leyera al revés, una ida y vuelta con el DAO pasaría igual.
+  ciudad y `cargar` la leyera al revés, una ida y vuelta con el DAO pasaría igual. Que el dato se
+  vea desde otra conexión prueba además que la inserción es persistente.
 - **Estado conocido en cada test.** El `@BeforeEach` descarta el Singleton por reflexión (sin tocar
   el código) y crea uno nuevo; al crearse, `BaseDeDatos` ejecuta `iniciarBD()`, que recrea la tabla
-  con los 20 datos semilla.
+  con los 20 datos semilla. Así un test no hereda lo que dejó el anterior, ni siquiera la conexión
+  cerrada de CI6.
 - **Datos distintos en cada campo** (`"Nombre"`, `"Apellido"`, `"40111222"`, `"Calle"`, `777`,
   `"Ciudad"`, `"2230001111"`), para que un cruce de columnas se note.
 
@@ -97,95 +113,104 @@ sequenceDiagram
 | Tabla `Asociados` | con la semilla / con una fila extra / con una fila con `numero = 0` / inexistente | `@BeforeEach` / `INSERT` o `DROP TABLE` propios |
 | Singleton | recién creado / conexión cerrada | `@BeforeEach` / `cerrarConexion()` |
 | Fila buscada | existe / no existe | id o DNI de la semilla / uno ausente |
-| DNI | nuevo / repetido / vacío / nulo | `"40111222"` / `"12345678"` / `""` / `null` |
-
-La SRS no fija largos, pero el esquema que crea `iniciarBD()` sí; de ahí salen los valores límite:
-
-| Columna | Tipo | Límite válido | Límite inválido |
-|---------|------|---------------|-----------------|
-| `nombre`, `apellido`, `calle` | `VARCHAR(30)` | 30 | 31 |
-| `ciudad` | `VARCHAR(35)` | 35 | 36 |
-| `DNI` | `VARCHAR(10) UNIQUE` | 10 | 11 |
-| `telefono` | `VARCHAR(15)` | 15 | 16 |
+| DNI | nuevo / repetido / con SQL inyectado | `"40111222"` / `"12345678"` / `"' OR '1'='1"` |
 
 Parámetros del DAO: `id` ∈ {1 (primera fila), 20 (última), 21 (inexistente)}; `limite` ∈ {1, 20
-(igual a la cantidad de filas), 21 (mayor)}. Los valores 0 de `id` y `limite` no se prueban porque
-el Javadoc los declara como precondición (`id > 0`, `limite > 0`).
+(igual a la cantidad de filas), 21 (mayor)}.
 
 ## Casos de prueba
 
-| Id | Operación y entrada | Resultado esperado | Rojo | Verde |
-|----|---------------------|--------------------|-----------|-------|
-| CI1 | `getInstancia()` dos veces | La misma instancia | ✅ | ✅ |
-| CI2 | Se borra el esquema y se crea el Singleton | `iniciarBD()` recrea `Grupo_7` | ✅ | ✅ |
-| CI3 | Inicialización | La tabla tiene id y los siete atributos de SRS §3.1 | ✅ | ✅ |
-| CI4 | Inicialización | 20 filas semilla, sin nulos, `numero` ≥ 0, DNI distintos | ✅ | ✅ |
-| CI5 | `iniciarBD()` con una fila extra | Se recrea la tabla: vuelve a 20 filas | ✅ | ✅ |
-| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S11) | ❌ D5 | ❌ D5 |
-| CI7 | `INSERT` propio sin DNI | `SQLException` (S12) | ❌ D6 | ❌ D6 |
-| CI8 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ | ✅ |
-| CI9 | `guardar` con cada texto en su largo máximo | Se guarda completo | ✅ | ✅ |
-| CI10–CI15 | `guardar` con nombre 31, apellido 31, DNI 11, calle 31, ciudad 36 o telefono 16 caracteres | `SQLException` y 20 filas (S10) | ✅ | ✅ |
-| CI16 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` | ✅ | ✅ |
-| CI17 | `guardar(null)` | `AssertionError` | ✅ | ✅ |
-| CI18 | `cargar(1)` | DTO igual a la fila 1 | ❌ D7 | ❌ D7 |
-| CI19 | `cargar(20)` | DTO igual a la fila 20 | ❌ D7 | ❌ D7 |
-| CI20 | `cargar(21)` | `null` (S7) | ❌ D7 | ❌ D7 |
-| CI21 | `cargarConLimite(1)` | Solo la fila 1 | ✅ | ✅ |
-| CI22 | `cargarConLimite(20)` | 20 elementos | ✅ | ✅ |
-| CI23 | `cargarConLimite(21)` | 20 elementos | ✅ | ✅ |
-| CI24 | `cargarBD()` | La tabla completa, cada DTO igual a su fila | ✅ | ✅ |
-| CI25 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D8 | ❌ D8 |
-| CI26 | `actualizar` un DNI inexistente | Ninguna fila cambia (S8) | ❌ D8 | ❌ D8 |
-| CI27 | `eliminar` un DNI existente | 19 filas; el DNI ya no está | ✅ | ✅ |
-| CI28 | `eliminar` un DNI inexistente | La tabla intacta (S8) | ✅ | ✅ |
-| CI29 | `eliminar("")` | `AssertionError` (S9) | ✅ | ✅ |
-| CI30 | `eliminar(null)` | `AssertionError` (S9) | ✅ | ✅ |
-| CI31 | `cargarBD()` con una fila con `numero = 0` | 21 DTO, el último con `numero` 0 (SRS §3.1) | ❌ D3 | ✅ |
-| CI32 | `cargarBD()` sin la tabla | `SQLException` hacia el llamador (Javadoc `@throws`) | ✅ | ✅ |
+| Id | Operación y entrada | Resultado esperado | Resultado |
+|----|---------------------|--------------------|-----------|
+| CI1 | `getInstancia()` dos veces | La misma instancia | ✅ |
+| CI2 | Se borra el esquema y se crea el Singleton | `iniciarBD()` recrea `Grupo_7` | ✅ |
+| CI3 | Inicialización | La tabla tiene id y los siete atributos del asociado | ✅ |
+| CI4 | Inicialización | 20 filas semilla, sin nulos, `numero` ≥ 0, DNI distintos | ✅ |
+| CI5 | `iniciarBD()` con una fila extra | Se recrea la tabla: vuelve a 20 filas | ✅ |
+| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S6) | ❌ D5 |
+| CI7 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ |
+| CI8 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` y 20 filas | ✅ |
+| CI9 | `cargar(1)` | DTO igual a la fila 1 | ❌ D7 |
+| CI10 | `cargar(20)` | DTO igual a la fila 20 | ❌ D7 |
+| CI11 | `cargar(21)` | `null` (S4) | ❌ D7 |
+| CI12 | `cargarConLimite(1)` | Solo la fila 1 | ✅ |
+| CI13 | `cargarConLimite(20)` | 20 elementos | ✅ |
+| CI14 | `cargarConLimite(21)` | 20 elementos | ✅ |
+| CI15 | `cargarBD()` | La tabla completa, cada DTO igual a su fila | ✅ |
+| CI16 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D8 |
+| CI17 | `actualizar` un DNI inexistente | Ninguna fila cambia (S5) | ❌ D8 |
+| CI18 | `eliminar` un DNI existente | 19 filas; el DNI ya no está | ✅ |
+| CI19 | `eliminar` un DNI inexistente | La tabla intacta (S5) | ✅ |
+| CI20 | `eliminar("' OR '1'='1")` | El texto se usa como valor del parámetro: la tabla intacta | ✅ |
+| CI21 | `cargarBD()` con una fila con `numero = 0` | 21 DTO, el último con `numero` 0 | ✅ |
+| CI22 | `cargarBD()` sin la tabla | `SQLException` hacia el llamador (Javadoc `@throws`) | ✅ |
 
 ## Resultados
 
-La suite se corrió contra un MySQL 8.0.40 real, antes y después de corregir `AsociadoDTO`:
+La suite se ejecutó una vez contra MySQL 8.0.40, sobre el código del ítem 2: el código entregado
+con el defecto D3 de `AsociadoDTO` corregido (`6cda0de`), como pide la consigna.
 
-| Fase | Fecha | Código | Total | Pasan | Fallan |
-|------|-------|--------|-------|-------|--------|
-| Rojo | 31/10/2026 y 02/11/2026 | Como se entregó | 32 | 24 | 8 |
-| Verde | 02/11/2026 | `AsociadoDTO` corregido (D3 y D4) | 32 | 25 | 7 |
+<!-- PENDIENTE: regenerar resultados/integration.{md,log} con run_tests.sh integration después de
+commitear los cambios del branch. Los valores de esta tabla salen de la corrida del 06/11. -->
 
-**En rojo** fallaron 8 casos, y cada uno se revisó contra el código para confirmar que la causa es
-un defecto y no un error del test. La corrida del 31/10 se repitió el 02/11 y dio exactamente lo
-mismo, así que el resultado es reproducible.
+| Total | Pasan | Fallan |
+|-------|-------|--------|
+| 22 | 16 | 6 |
 
-**En verde** pasó CI31, el caso que fallaba por el defecto D3 de `AsociadoDTO`: una fila con
-`numero = 0` ahora se lee bien desde la base. Los otros 7 siguen fallando a propósito. Son los
-defectos D5 a D8, que están en `BaseDeDatos` y `DataAccessObject`, y la consigna no pide corregir
-esas clases: solo pide demostrar que la suite los detecta. Que sigan en rojo es justamente esa
-demostración. Ningún caso que pasaba en rojo dejó de pasar.
+**Pasan 16 casos**: el Singleton entrega siempre la misma instancia, `iniciarBD()` crea el esquema,
+la tabla y los datos semilla, y `guardar`, `cargarConLimite`, `cargarBD` y `eliminar` funcionan
+como dice la SRS. CI20 muestra que las consultas usan parámetros: un DNI con SQL inyectado no
+borra nada. CI21 muestra que, con D3 corregido, una fila con `numero = 0` se lee bien desde la base.
 
-Como el código entregado no compila (D1 y D2), las dos corridas se hicieron sobre una copia del
-proyecto con esos dos arreglos aplicados. La del 31/10 usó el commit `c1ff2a6`; las del 02/11 usaron
-una copia temporal que no se sube al repositorio (ver Apéndice C). Las tablas completas están en el
-Apéndice A (`resultados/integration-rojo.md` y `resultados/integration-verde.md`).
+**Fallan 6 casos**, y cada uno se revisó contra el código para confirmar que la causa es un defecto y
+no un error del test. Son los defectos D5, D7 y D8, que están en `BaseDeDatos` y `DataAccessObject`.
+La consigna no pide corregir esas clases, sino demostrar que la suite los detecta: que esos casos
+fallen es esa demostración.
+
+Como el código entregado no compila (D1 y D2), la suite se ejecutó sobre una copia temporal del
+proyecto con esos dos arreglos aplicados, que no se sube al repositorio (ver Apéndice C). La tabla
+completa está en el Apéndice A (`resultados/integration.md`).
+
+## Qué atrapa la suite
+
+La consigna pide demostrar cómo la suite atrapa excepciones de SQL, errores de mapeo e
+inconsistencias del código provisto:
+
+| Categoría | Evidencia | Casos |
+|-----------|-----------|-------|
+| Excepciones de SQL | La violación de unicidad del DNI y la tabla inexistente llegan a quien llama al DAO como `SQLException` | CI8, CI22 (pasan) |
+| Errores de mapeo | D7: `cargar` lee el `ResultSet` sin `next()` y falla al convertir la fila en DTO | CI9–CI11 (fallan) |
+| Errores de mapeo | Cada DTO cargado coincide campo por campo con su fila, incluida una con `numero = 0` | CI15, CI21 (pasan) |
+| Inconsistencias | D8: `actualizar` siempre modifica la fila 1, no la del DNI | CI16, CI17 (fallan) |
+| Inconsistencias | D5: después de cerrar la conexión, el Singleton entrega un manejador inutilizable | CI6 (falla) |
 
 ## Defectos detectados
 
 | Id | Ubicación | Descripción | Detectado por | Estado |
 |----|-----------|-------------|---------------|--------|
-| D3 | `AsociadoDTO.setNumero` | Rechaza 0: una fila válida con `numero = 0` rompe `cargarBD()` al mapearla | CU11, CI31 | Corregido (`6cda0de`) |
+| D3 | `AsociadoDTO.setNumero` | Rechaza 0: una fila válida con `numero = 0` rompe `cargarBD()` al mapearla | CU4, CI21 | Corregido (`6cda0de`) |
 | D5 | `BaseDeDatos.getInstancia` | Después de `cerrarConexion()` sigue entregando el mismo manejador, con la conexión cerrada | CI6 | No se corrige |
-| D6 | `BaseDeDatos.iniciarBD` (esquema) | Ninguna columna es `NOT NULL`: la tabla acepta un asociado sin DNI | CI7 | No se corrige |
-| D7 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI18, CI19, CI20 | No se corrige |
-| D8 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI25, CI26 | No se corrige |
+| D7 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI9, CI10, CI11 | No se corrige |
+| D8 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI16, CI17 | No se corrige |
 
-D8 se manifiesta de dos maneras. En CI25 el `UPDATE` intenta poner en la fila 1 el DNI de la fila 7
-y MySQL lo rechaza por el `UNIQUE` (`Duplicate entry '22334455'`). En CI26, con un DNI nuevo, la
+D8 se manifiesta de dos maneras. En CI16 el `UPDATE` intenta poner en la fila 1 el DNI de la fila 7
+y MySQL lo rechaza por el `UNIQUE` (`Duplicate entry '22334455'`). En CI17, con un DNI nuevo, la
 fila 1 se sobrescribe sin error: es una pérdida de datos silenciosa.
+
+D3 se detectó en el ítem 1 (CU4) y se corrigió acá, porque la consigna lo pide. CI21 es el caso de
+integración que lo cubre: con el `AsociadoDTO` entregado, una fila válida con `numero = 0` hace
+fallar la carga completa de la tabla.
 
 ## Observaciones de revisión de código
 
 Puntos que ningún test detecta:
 
+- El esquema que crea `iniciarBD()` no declara ninguna columna `NOT NULL`: la tabla acepta un
+  asociado sin DNI. No se registra como defecto porque el sistema nunca puede enviarlo: el DNI no
+  nulo es una precondición de `AsociadoDTO`.
+- Los largos de las columnas (`VARCHAR(30)` para nombre, apellido y calle, `VARCHAR(35)` para
+  ciudad, `VARCHAR(10)` para DNI y `VARCHAR(15)` para teléfono) no figuran en la SRS, que solo pide
+  que los campos no sean nulos. Se recomienda que la especificación los defina.
 - `CrearDTO(int id, …)` recibe el `id` y lo ignora; `AsociadoDTO` ni siquiera tiene ese campo.
 - `ejecutarConsulta` nunca cierra el `PreparedStatement` (pérdida de recursos).
 - `abrirConexion` e `iniciarBD` atrapan la `SQLException` y solo la imprimen. Con el servidor caído,
@@ -200,21 +225,22 @@ Puntos que ningún test detecta:
 ## Fallas sembradas
 
 Sin modificar el código, la capacidad de detección se demuestra con la base en estados forzados
-desde el test: una fila con `numero = 0` (CI31), la tabla borrada (CI32), el esquema borrado (CI2)
+desde el test: una fila con `numero = 0` (CI21), la tabla borrada (CI22), el esquema borrado (CI2)
 y la conexión cerrada (CI6).
 
 ## Conclusiones
 
-- La suite cubre las cuatro operaciones CRUD, el Singleton y la inicialización con 32 casos, y
-  detectó cuatro defectos nuevos (D5–D8) que la prueba unitaria no podía ver: todos dependen del SQL
-  real, del esquema o del ciclo de vida de la conexión.
+- La suite cubre el Singleton, la inicialización y las cuatro operaciones CRUD con 22 casos, y
+  detectó tres defectos nuevos (D5, D7 y D8) que la prueba unitaria no podía ver: todos dependen del
+  SQL, del esquema o del ciclo de vida de la conexión.
 - La verificación con SQL propio fue determinante en D8: con un DNI nuevo, `actualizar` no lanza
   error y una lectura con el mismo DAO no habría mostrado que se pisó la fila 1.
-- CI31 muestra cómo un defecto unitario (D3) reaparece como error de mapeo en la integración: una
-  fila que la SRS considera válida hace fallar la carga completa de la tabla. Al corregir
-  `AsociadoDTO`, CI31 pasó a verde sin tocar nada de la persistencia: el problema estaba en el DTO,
-  y la integración lo mostraba de otra forma.
-- Los valores límite del esquema (CI9–CI15) pasaron: el motor protege los largos máximos. En cambio,
-  el esquema no aplica las reglas de nulidad de la SRS (D6).
-- Limitaciones: la suite depende de que MySQL esté levantado con el usuario de `docker-compose.yml`,
-  del modo estricto (S10) y de `-ea`.
+- CI21 muestra cómo un defecto unitario (D3) reaparece como error de mapeo en la integración: una
+  fila que la SRS considera válida hacía fallar la carga completa de la tabla. Con `AsociadoDTO`
+  corregido, CI21 pasa sin tocar nada de la persistencia: el problema estaba en el DTO, y la
+  integración lo mostraba de otra forma.
+- CI20 confirma que las operaciones usan consultas con parámetros: el DAO no es vulnerable a una
+  inyección SQL a través del DNI.
+- Limitaciones: la suite depende de que MySQL esté levantado con el usuario de
+  `docker-compose.yml` y de `-ea`. Tampoco verifica el `id` de los DTO cargados, porque
+  `AsociadoDTO` no tiene ese campo.

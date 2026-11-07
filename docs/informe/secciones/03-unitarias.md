@@ -109,25 +109,23 @@ Los getters no reciben entradas: se verifican en todos los casos a través de `a
 
 ## Resultados
 
-Ejecución sobre el código provisto, con solo las correcciones de compilación D1 y D2 aplicadas
-(commit `c1ff2a6`), mediante `run_tests.sh unit rojo`:
+La suite se ejecutó una vez, sobre `AsociadoDTO` tal como se entregó, con solo las correcciones de
+compilación D1 y D2 aplicadas en una copia temporal (Apéndice C), mediante `run_tests.sh unit`:
 
-<!-- PENDIENTE: volver a correr `run_tests.sh unit rojo` con la suite de 4 casos para regenerar
-resultados/unit-rojo.{md,log}. Los valores de esta tabla salen de la corrida del 25/10, en la que
-estos cuatro métodos (entonces CU1, CU2, CU10 y CU11) tenían el mismo código. -->
+<!-- PENDIENTE: regenerar resultados/unit.{md,log} con run_tests.sh unit sobre el código de master. -->
 
-| Fase | Total | Pasan | Fallan |
-|------|-------|-------|--------|
-| Rojo (código provisto) | 4 | 3 | 1 |
+| Total | Pasan | Fallan |
+|-------|-------|--------|
+| 4 | 3 | 1 |
 
-El único fallo corresponde a CU4 (defecto D3), y se verificó contra la implementación para
-confirmar que la causa es el defecto y no un error del test. La tabla completa de resultados está
-en el apéndice de resultados (`resultados/unit-rojo.md`). La captura de esta ejecución es requerida
-y la toma el equipo desde el IDE (ver Apéndice B).
+Pasan CU1, CU2 y CU3: el constructor por defecto, el constructor parametrizado y los setters de
+texto funcionan como dice la SRS. Falla CU4 (defecto D3), y se verificó contra la implementación
+para confirmar que la causa es el defecto y no un error del test. La tabla completa está en el
+apéndice de resultados (`resultados/unit.md`). La captura de esta ejecución es requerida y la toma
+el equipo desde el IDE (ver Apéndice B).
 
-No hay fase verde: por la regla del trabajo, el código de producción no se modifica (salvo D1 y
-D2, que impedían compilar), así que el defecto queda registrado y su caso permanece en rojo como
-evidencia de detección.
+D3 se corrige en el punto 2, que pide "corregir si es necesario el código del ítem 1" (ver la
+sección de integración y el registro de defectos).
 
 ## Defectos detectados
 
