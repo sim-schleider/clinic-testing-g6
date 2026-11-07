@@ -32,13 +32,13 @@ public class AsociadoDTO implements Serializable {
      * @param telefono El teléfono del asociado.
      */
     public AsociadoDTO(String nombre, String apellido, String dni, String ciudad, String calle, int numero, String telefono) {
-        setNombre(nombre);
-        setApellido(apellido);
-        setDni(dni);
-        setCiudad(ciudad);
-        setCalle(calle);
-        setNumero(numero);
-        setTelefono(telefono);
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.dni = dni;
+        this.ciudad = ciudad;
+        this.calle = calle;
+        this.numero = numero;
+        this.telefono = telefono;
     }
 
     /**
