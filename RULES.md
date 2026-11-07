@@ -10,9 +10,8 @@ Si hay conflicto con otro documento del repo, rige este archivo.
   queda tal como fue entregado: no se corrigen defectos, no se renombran clases ni paquetes, no se
   refactoriza, no se ajustan validaciones ni se tocan los `assert`.
 - **Excepción: `src/main/java/persistencia/AsociadoDTO.java`.** El punto 2 de la consigna dice
-  "Corregir si es necesario el código del ítem 1", y el ítem 1 es `AsociadoDTO`. Sus defectos
-  (D3, D4) se corrigen, un commit `fix(persistencia): ...` por defecto, para tener la corrida en
-  verde. Ninguna otra clase entra en esta excepción.
+  "Corregir si es necesario el código del ítem 1", y el ítem 1 es `AsociadoDTO`. Su defecto D3 se
+  corrige, con un commit `fix(persistencia): ...`. Ninguna otra clase entra en esta excepción.
 - El trabajo consiste únicamente en **diseñar, escribir y ejecutar pruebas** sobre lo
   desarrollado, y **documentar** los resultados.
 - Solo se escribe en:

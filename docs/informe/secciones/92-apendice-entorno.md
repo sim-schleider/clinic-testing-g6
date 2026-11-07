@@ -55,5 +55,5 @@ Se adaptó el entorno al código, nunca al revés:
     mvn test -Dgroups=unit                                 # o integration, mock, concurrency
   ```
 
-  La copia no se commitea. Lo único que se corrigió en el repositorio es `AsociadoDTO` (D3 y D4),
+  La copia no se commitea. Lo único que se corrigió en el repositorio es `AsociadoDTO` (D3),
   porque la consigna lo pide.
