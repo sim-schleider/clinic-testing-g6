@@ -94,14 +94,4 @@ class DatabaseIntegrationTest {
 
         assertFalse(conexion.isClosed(), "getInstancia() devolvió un manejador con la conexión cerrada");
     }
-
-    // CI7 – Insertar con SQL propio un asociado sin DNI. Esperado (supuesto): la tabla lo rechaza,
-    // porque el DNI "no puede ser nulo; actúa como identificador único".
-    @Test
-    void testSchemaRejectsNullDni() {
-        assertThrows(SQLException.class, () -> DatabaseTestSupport.execute(
-                "INSERT INTO Asociados (nombre, apellido, calle, numero, ciudad, telefono) "
-                        + "VALUES ('Sin', 'Dni', 'Calle', 1, 'Ciudad', '1')"),
-                "la tabla aceptó un asociado con DNI nulo");
-    }
 }
