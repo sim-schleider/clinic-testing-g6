@@ -57,3 +57,15 @@ Se adaptó el entorno al código, nunca al revés:
 
   La copia no se commitea. Lo único que se corrigió en el repositorio es `AsociadoDTO` (D3),
   porque la consigna lo pide.
+
+- **Suite unitaria sobre el código entregado.** La suite del punto 1 se ejecuta sobre
+  `AsociadoDTO` tal como se entregó, antes de la corrección de D3, para que muestre la detección
+  del defecto. En la misma copia temporal se deshace la corrección antes de correrla:
+
+  ```bash
+  git revert -n 6cda0de                                    # AsociadoDTO como se entregó (solo en la copia)
+  # ...y se corre mvn test -Dgroups=unit como arriba
+  ```
+
+  Las otras suites (integración, mocks y concurrencia) se ejecutan sin ese paso, sobre el código
+  con D3 corregido.

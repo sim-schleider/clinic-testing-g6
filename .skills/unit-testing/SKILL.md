@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Design, write and run isolated unit tests (JUnit 5) for a single Java class against its specification using equivalence partitioning and boundary value analysis, then write the design, results and defects into the report section. Restrictions that are preconditions (such as the SRS §3.1 rules of AsociadoDTO) are not tested with inputs that violate them. Use this whenever the user wants unit tests or "pruebas unitarias", "testing atómico", "clases de equivalencia", "valores límite", "particiones", "precondiciones", test cases for setters, getters or integrity rules of a DTO or value object (AsociadoDTO, Domicilio, …), or wants to prove that a class meets its contract without starting MySQL or any other service. Not for code that needs the database (db-integration-testing), mocked collaborators (mock-testing), threads or the ambulance state machine (concurrency-testing), or assembling and exporting the final report (test-report).
+description: Design, write and run isolated unit tests (JUnit 5) for a single Java class against its specification using equivalence partitioning and boundary value analysis, then write the design, results and defects into the report section. Restrictions that are preconditions (Javadoc `pre:` clauses, the AsociadoDTO constructor) are not tested with inputs that violate them; the validations of the AsociadoDTO setters are tested with their invalid classes. Use this whenever the user wants unit tests or "pruebas unitarias", "testing atómico", "clases de equivalencia", "valores límite", "particiones", "precondiciones", test cases for setters, getters or integrity rules of a DTO or value object (AsociadoDTO, Domicilio, …), or wants to prove that a class meets its contract without starting MySQL or any other service. Not for code that needs the database (db-integration-testing), mocked collaborators (mock-testing), threads or the ambulance state machine (concurrency-testing), or assembling and exporting the final report (test-report).
 ---
 
 # Unit testing: equivalence classes and boundary values
@@ -31,14 +31,20 @@ test cases:
   the domain, so it forms a class with its own case, even if the input looks invalid.
 
 **In this project the SRS §3.1 rules of `AsociadoDTO` (strings not null, `numero >= 0`) are
-preconditions** of the parameterized constructor and of the setters (criterion confirmed by the
-cátedra). The same applies to every `pre:` in a Javadoc. The `assert` statements in the setters
-are defensive checks of those preconditions, not a feature to verify. So:
+guaranteed behaviour of the setters** (decision agreed by the team). The assignment asks to test
+"las validaciones internas de integridad implementadas en los setters", and the design report
+(`docs/Informe.md`) says the setters "incorporan aserciones (`assert`) para validar la integridad
+básica de los datos —como evitar nombres nulos o números negativos—". For the **parameterized
+constructor** the same rules are **preconditions**: no document says it validates anything. Every
+`pre:` in a Javadoc is a precondition too. So:
 
-- no case passes `null` or a negative `numero` to `AsociadoDTO`;
-- the constructor not validating its arguments is **not** a defect;
-- a check that **rejects an input that meets the precondition** (like `numero > 0` rejecting 0)
-  **is** a defect, and the valid boundary value is what exposes it.
+- each setter has an invalid class (`null`, or `numero < 0`) whose expected result is
+  `AssertionError` **and the DTO unchanged** (all seven getters still return the scenario values);
+- no case passes `null` or a negative `numero` to the constructor, and the constructor not
+  validating its arguments is **not** a defect (it is recorded as a design observation);
+- a check that **rejects a valid input** (like `numero > 0` rejecting 0) **is** a defect, and the
+  valid boundary value is what exposes it. For `setNumero` both sides of the bound are tested
+  (−1 and 0).
 
 When it is unclear whether a restriction is a precondition or guaranteed behaviour, ask the user
 before designing cases for it, and write the answer down as a supuesto.
@@ -172,8 +178,9 @@ the contract for inputs inside the domain:
 - a setter that assigns the wrong field,
 - a getter that returns another field.
 
-Do not seed "delete a precondition check": no case passes inputs outside the domain, so no case
-can catch it, and that is correct.
+Deleting a setter validation is a good fault too (CU9–CU15 catch it). Do not seed "delete a
+precondition check" in methods whose rules are preconditions: no case passes inputs outside the
+domain, so no case can catch it, and that is correct.
 
 Record them in the section's "Fallas sembradas" table:
 
@@ -197,7 +204,7 @@ Apéndice B, where the screenshots the team takes go. "Conclusiones" should cove
 
 - Take an expected result from the implementation. A copied bug becomes a green test.
 - Write a case whose input violates a precondition (for `AsociadoDTO`: a `null` string or a
-  negative `numero`). There is no expected result to compare against.
+  negative `numero` passed to the constructor). There is no expected result to compare against.
 - Report as a defect that a method does not check its own preconditions.
 - Put two invalid classes in one case.
 - Verify only the getter of the field that changed. A setter that writes another field passes.

@@ -46,8 +46,11 @@ el CRUD se prueba a través del DAO. Los métodos `ejecutarInsert`, `ejecutarCon
 `ejecutarActualizacion` y `ejecutarDelete` de `BaseDeDatos` se ejercitan igual, porque el DAO los
 llama.
 
-**Precondiciones.** Con el mismo criterio que el ítem 1, las reglas de validación de la SRS y los
-`pre:` del Javadoc son precondiciones, y las entradas que las violan no se prueban: `guardar(null)`
+**Precondiciones.** Con el mismo criterio que el constructor de `AsociadoDTO` en el ítem 1, los
+`pre:` del Javadoc son precondiciones, y las entradas que las violan no se prueban. A diferencia de
+los setters del DTO, cuyas validaciones la consigna del ítem 1 pide comprobar, la consigna del ítem 2
+pide verificar la comunicación con el motor, no las validaciones del DAO, que el informe de diseño
+describe como "validaciones defensivas" previas a contactar la base. Quedan fuera: `guardar(null)`
 y `actualizar(null)` (`pre: asociado no debe ser nulo`), `cargar(0)` (`pre: id > 0`),
 `cargarConLimite(0)` (`pre: limite > 0`) y un DNI vacío o nulo en `eliminar` (el DNI "no puede ser
 nulo", SRS §3.1). La SRS dice que el guardado "validará que no sea nula" la entidad, pero el
