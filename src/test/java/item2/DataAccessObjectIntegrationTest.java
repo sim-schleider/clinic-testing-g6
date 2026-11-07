@@ -41,7 +41,7 @@ class DataAccessObjectIntegrationTest {
 
     /** Asociado válido con un valor distinto en cada campo, para detectar columnas cruzadas. */
     private static Asociado asociadoValido() {
-        return asociado("Nombre", "Apellido", "40111222", "Calle", 777, "Ciudad", "2230001111");
+        return asociado("Valentino", "Hernan", "40111222", "Calle", 777, "Ciudad", "2230001111");
     }
 
     // ---------------------------------------------------------------- guardar
@@ -52,7 +52,7 @@ class DataAccessObjectIntegrationTest {
         dao.guardar(asociadoValido());
 
         assertEquals(21, DatabaseTestSupport.countRows());
-        assertEquals("Nombre|Apellido|40111222|Calle|777|Ciudad|2230001111\n",
+        assertEquals("Valentino|Hernan|40111222|Calle|777|Ciudad|2230001111\n",
                 DatabaseTestSupport.rowsWhere("DNI = '40111222'"));
     }
 
@@ -60,7 +60,7 @@ class DataAccessObjectIntegrationTest {
     // (el DNI "actúa como identificador único") y la tabla sin filas nuevas.
     @Test
     void testGuardarRejectsDuplicateDni() throws SQLException {
-        Asociado repetido = asociado("Nombre", "Apellido", "12345678", "Calle", 777, "Ciudad", "2230001111");
+        Asociado repetido = asociado("Valentino", "Hernan", "12345678", "Calle", 777, "Ciudad", "2230001111");
 
         assertThrows(SQLIntegrityConstraintViolationException.class, () -> dao.guardar(repetido));
         assertEquals(20, DatabaseTestSupport.countRows());
@@ -183,7 +183,7 @@ class DataAccessObjectIntegrationTest {
     @Test
     void testCargarBDMapsNumeroZero() throws SQLException {
         DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
-                + "VALUES ('Cero', 'Numero', '50000000', 'Calle', 0, 'Ciudad', '2230000000')");
+                + "VALUES ('Simon', 'Schleider', '50000000', 'Calle', 0, 'Ciudad', '2230000000')");
 
         ArrayList<AsociadoDTO> dtos = assertDoesNotThrow(() -> dao.cargarBD());
 

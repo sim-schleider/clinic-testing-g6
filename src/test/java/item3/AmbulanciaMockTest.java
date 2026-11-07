@@ -41,8 +41,8 @@ class AmbulanciaMockTest {
         observer = mock(Observer.class);
         ambulance.addObserver(observer);
         Domicilio address = new Domicilio("Calle", 1, "Ciudad");
-        associate = new Asociado("Ana", "Diaz", "30111222", "2230001111", address);
-        operator = new Operario("Juan", "Perez", "20111222", "2230002222", address, ambulance);
+        associate = new Asociado("Lucas", "Paniagua", "30111222", "2230001111", address);
+        operator = new Operario("Valentino", "Hernan", "20111222", "2230002222", address, ambulance);
     }
 
     /** El observador recibió una notificación de la ambulancia. */

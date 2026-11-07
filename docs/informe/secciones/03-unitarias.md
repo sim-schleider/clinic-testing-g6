@@ -57,7 +57,7 @@ definieron clases por formato; se recomienda que la especificación los defina.
 | Id | Escenario | Estado |
 |----|-----------|--------|
 | E1 | DTO recién creado con el constructor por defecto | Valores por defecto de Java (S3) |
-| E2 | DTO cargado con valores válidos y **distintos en cada campo**: `"Valentino"`, `"Lombardo"`, `"40000000"`, `"Mar del Plata"`, `"Ratiery"`, `777`, `"2236767676"` | Cumple todas las reglas de la SRS |
+| E2 | DTO cargado con valores válidos y **distintos en cada campo**: `"Marina"`, `"Lombardo"`, `"40000000"`, `"Mar del Plata"`, `"Ratiery"`, `777`, `"2236767676"` | Cumple todas las reglas de la SRS |
 
 E2 se arma antes de cada prueba (`@BeforeEach`). Que sus valores sean distintos permite detectar
 un setter o getter que lea o escriba otro campo: después de cada operación se verifican los

@@ -40,8 +40,8 @@ class AmbulanciaStateMachineTest {
     void setUpAmbulance() {
         ambulance = new Ambulancia();
         Domicilio address = new Domicilio("Calle", 1, "Ciudad");
-        associate = new Asociado("Ana", "Diaz", "30111222", "2230001111", address);
-        operator = new Operario("Juan", "Perez", "20111222", "2230002222", address, ambulance);
+        associate = new Asociado("Lucas", "Paniagua", "30111222", "2230001111", address);
+        operator = new Operario("Valentino", "Hernan", "20111222", "2230002222", address, ambulance);
     }
 
     /** Verifica el estado actual y el invariante de ocupación que le corresponde. */

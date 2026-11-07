@@ -31,17 +31,17 @@ class AmbulanciaConcurrencyTest {
 
     private Ambulancia ambulance;
     private Domicilio address;
-    private Asociado ana;
-    private Asociado beto;
+    private Asociado lucas;
+    private Asociado simon;
     private Operario operator;
 
     @BeforeEach
     void setUpAmbulance() {
         ambulance = new Ambulancia();
         address = new Domicilio("Calle", 1, "Ciudad");
-        ana = new Asociado("Ana", "Diaz", "30111222", "2230001111", address);
-        beto = new Asociado("Beto", "Gomez", "30333444", "2230003333", address);
-        operator = new Operario("Juan", "Perez", "20111222", "2230002222", address, ambulance);
+        lucas = new Asociado("Lucas", "Paniagua", "30111222", "2230001111", address);
+        simon = new Asociado("Simon", "Schleider", "30333444", "2230003333", address);
+        operator = new Operario("Valentino", "Hernan", "20111222", "2230002222", address, ambulance);
     }
 
     private static Thread startThread(Runnable task) {
@@ -73,8 +73,8 @@ class AmbulanciaConcurrencyTest {
      * regresarSinPaciente(). Devuelve true si el pedido en espera se despertó y terminó dentro de 5 s.
      */
     private boolean waitingRequestWakesUp(Ambulancia ambulance) throws InterruptedException {
-        ambulance.atenderDomicilio(ana);
-        Thread request = startThread(() -> ambulance.trasladarALaClinica(beto));
+        ambulance.atenderDomicilio(lucas);
+        Thread request = startThread(() -> ambulance.trasladarALaClinica(simon));
         waitUntil(() -> isWaiting(request), 2000, "el pedido de traslado queda esperando");
         assertInstanceOf(AtendiendoEnDomicilioState.class, ambulance.getEstadoActual(),
                 "el pedido en espera cambió el estado de la ambulancia ocupada");
@@ -99,7 +99,7 @@ class AmbulanciaConcurrencyTest {
     @Test
     void testWaitingRequestWakesUpOnVolviendoDelTaller() throws InterruptedException {
         ambulance.solicitarMantenimiento(operator);
-        Thread request = startThread(() -> ambulance.atenderDomicilio(ana));
+        Thread request = startThread(() -> ambulance.atenderDomicilio(lucas));
         waitUntil(() -> isWaiting(request), 2000, "el pedido de atención queda esperando");
 
         ambulance.volviendoDelTaller();
@@ -112,8 +112,8 @@ class AmbulanciaConcurrencyTest {
     // Esperado: los dos terminan sin delegar en el estado (sigue AtendiendoEnDomicilio).
     @Test
     void testEndingSimulacionReleasesAllWaitingThreads() throws InterruptedException {
-        ambulance.atenderDomicilio(ana);
-        Thread transfer = startThread(() -> ambulance.trasladarALaClinica(beto));
+        ambulance.atenderDomicilio(lucas);
+        Thread transfer = startThread(() -> ambulance.trasladarALaClinica(simon));
         Thread maintenance = startThread(() -> ambulance.solicitarMantenimiento(operator));
         waitUntil(() -> isWaiting(transfer) && isWaiting(maintenance), 2000, "los dos pedidos esperan");
 
@@ -130,7 +130,7 @@ class AmbulanciaConcurrencyTest {
     // "periódicamente intenta retornar la ambulancia a la clínica mientras la simulación esté activa").
     @Test
     void testRetornoAutomaticoReturnsAmbulance() throws InterruptedException {
-        ambulance.atenderDomicilio(ana);
+        ambulance.atenderDomicilio(lucas);
         ambulance.regresarSinPaciente();
 
         startThread(new RetornoAutomatico(ambulance));
@@ -145,7 +145,7 @@ class AmbulanciaConcurrencyTest {
     // un intervalo (10 s, más 5 s de margen) (Javadoc: retorna "mientras la simulación esté activa").
     @Test
     void testRetornoAutomaticoAfterSimulacionDoesNothing() throws InterruptedException {
-        ambulance.atenderDomicilio(ana);
+        ambulance.atenderDomicilio(lucas);
         ambulance.regresarSinPaciente();
         ambulance.setSimulacionActiva(false);
 
@@ -162,7 +162,7 @@ class AmbulanciaConcurrencyTest {
     // está en curso (su hilo sigue en TIMED_WAITING).
     @Test
     void testSlowTransitionDoesNotBlockQueries() throws InterruptedException {
-        ambulance.trasladarALaClinica(ana);
+        ambulance.trasladarALaClinica(lucas);
         Thread returnThread = startThread(ambulance::regresarSinPaciente);
         waitUntil(() -> returnThread.getState() == Thread.State.TIMED_WAITING, 2000, "el retorno está en curso");
 
@@ -178,8 +178,8 @@ class AmbulanciaConcurrencyTest {
     @Test
     void testSmallSimulacionFinishes() throws InterruptedException {
         Thread[] threads = {
-                startThread(new Asociado("Ana", "Diaz", "30111222", "2230001111", address, 1, ambulance)),
-                startThread(new Asociado("Beto", "Gomez", "30333444", "2230003333", address, 1, ambulance)),
+                startThread(new Asociado("Lucas", "Paniagua", "30111222", "2230001111", address, 1, ambulance)),
+                startThread(new Asociado("Simon", "Schleider", "30333444", "2230003333", address, 1, ambulance)),
                 startThread(operator),
                 startThread(new RetornoAutomatico(ambulance))};
 

@@ -83,7 +83,7 @@ Javadoc lo declara como precondición; se sigue el criterio de la cátedra y no 
   el código) y crea uno nuevo; al crearse, `BaseDeDatos` ejecuta `iniciarBD()`, que recrea la tabla
   con los 20 datos semilla. Así un test no hereda lo que dejó el anterior, ni siquiera la conexión
   cerrada de CI6.
-- **Datos distintos en cada campo** (`"Nombre"`, `"Apellido"`, `"40111222"`, `"Calle"`, `777`,
+- **Datos distintos en cada campo** (`"Valentino"`, `"Hernan"`, `"40111222"`, `"Calle"`, `777`,
   `"Ciudad"`, `"2230001111"`), para que un cruce de columnas se note.
 
 Secuencia de `guardar` y de `cargar`, trazada sobre el código:
