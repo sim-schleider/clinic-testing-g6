@@ -102,7 +102,7 @@ sequenceDiagram
     T->>D: cargar(id)
     D->>B: ejecutarConsulta(SELECT ... WHERE id = ?, id)
     B->>M: executeQuery() → ResultSet
-    D->>D: lee el ResultSet sin next() (D7)
+    D->>D: lee el ResultSet sin next() (D5)
 ```
 
 ## Estados del entorno y valores representativos
@@ -127,18 +127,18 @@ Parámetros del DAO: `id` ∈ {1 (primera fila), 20 (última), 21 (inexistente)}
 | CI3 | Inicialización | La tabla tiene id y los siete atributos del asociado | ✅ |
 | CI4 | Inicialización | 20 filas semilla, sin nulos, `numero` ≥ 0, DNI distintos | ✅ |
 | CI5 | `iniciarBD()` con una fila extra | Se recrea la tabla: vuelve a 20 filas | ✅ |
-| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S6) | ❌ D5 |
+| CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S6) | ❌ D4 |
 | CI7 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ |
 | CI8 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` y 20 filas | ✅ |
-| CI9 | `cargar(1)` | DTO igual a la fila 1 | ❌ D7 |
-| CI10 | `cargar(20)` | DTO igual a la fila 20 | ❌ D7 |
-| CI11 | `cargar(21)` | `null` (S4) | ❌ D7 |
+| CI9 | `cargar(1)` | DTO igual a la fila 1 | ❌ D5 |
+| CI10 | `cargar(20)` | DTO igual a la fila 20 | ❌ D5 |
+| CI11 | `cargar(21)` | `null` (S4) | ❌ D5 |
 | CI12 | `cargarConLimite(1)` | Solo la fila 1 | ✅ |
 | CI13 | `cargarConLimite(20)` | 20 elementos | ✅ |
 | CI14 | `cargarConLimite(21)` | 20 elementos | ✅ |
 | CI15 | `cargarBD()` | La tabla completa, cada DTO igual a su fila | ✅ |
-| CI16 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D8 |
-| CI17 | `actualizar` un DNI inexistente | Ninguna fila cambia (S5) | ❌ D8 |
+| CI16 | `actualizar` el asociado de la fila 7 (DNI `22334455`) | Cambia la fila 7 y ninguna otra | ❌ D6 |
+| CI17 | `actualizar` un DNI inexistente | Ninguna fila cambia (S5) | ❌ D6 |
 | CI18 | `eliminar` un DNI existente | 19 filas; el DNI ya no está | ✅ |
 | CI19 | `eliminar` un DNI inexistente | La tabla intacta (S5) | ✅ |
 | CI20 | `eliminar("' OR '1'='1")` | El texto se usa como valor del parámetro: la tabla intacta | ✅ |
@@ -163,7 +163,7 @@ como dice la SRS. CI20 muestra que las consultas usan parámetros: un DNI con SQ
 borra nada. CI21 muestra que, con D3 corregido, una fila con `numero = 0` se lee bien desde la base.
 
 **Fallan 6 casos**, y cada uno se revisó contra el código para confirmar que la causa es un defecto y
-no un error del test. Son los defectos D5, D7 y D8, que están en `BaseDeDatos` y `DataAccessObject`.
+no un error del test. Son los defectos D4, D5 y D6, que están en `BaseDeDatos` y `DataAccessObject`.
 La consigna no pide corregir esas clases, sino demostrar que la suite los detecta: que esos casos
 fallen es esa demostración.
 
@@ -179,21 +179,21 @@ inconsistencias del código provisto:
 | Categoría | Evidencia | Casos |
 |-----------|-----------|-------|
 | Excepciones de SQL | La violación de unicidad del DNI y la tabla inexistente llegan a quien llama al DAO como `SQLException` | CI8, CI22 (pasan) |
-| Errores de mapeo | D7: `cargar` lee el `ResultSet` sin `next()` y falla al convertir la fila en DTO | CI9–CI11 (fallan) |
+| Errores de mapeo | D5: `cargar` lee el `ResultSet` sin `next()` y falla al convertir la fila en DTO | CI9–CI11 (fallan) |
 | Errores de mapeo | Cada DTO cargado coincide campo por campo con su fila, incluida una con `numero = 0` | CI15, CI21 (pasan) |
-| Inconsistencias | D8: `actualizar` siempre modifica la fila 1, no la del DNI | CI16, CI17 (fallan) |
-| Inconsistencias | D5: después de cerrar la conexión, el Singleton entrega un manejador inutilizable | CI6 (falla) |
+| Inconsistencias | D6: `actualizar` siempre modifica la fila 1, no la del DNI | CI16, CI17 (fallan) |
+| Inconsistencias | D4: después de cerrar la conexión, el Singleton entrega un manejador inutilizable | CI6 (falla) |
 
 ## Defectos detectados
 
 | Id | Ubicación | Descripción | Detectado por | Estado |
 |----|-----------|-------------|---------------|--------|
 | D3 | `AsociadoDTO.setNumero` | Rechaza 0: una fila válida con `numero = 0` rompe `cargarBD()` al mapearla | CU4, CI21 | Corregido (`6cda0de`) |
-| D5 | `BaseDeDatos.getInstancia` | Después de `cerrarConexion()` sigue entregando el mismo manejador, con la conexión cerrada | CI6 | No se corrige |
-| D7 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI9, CI10, CI11 | No se corrige |
-| D8 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI16, CI17 | No se corrige |
+| D4 | `BaseDeDatos.getInstancia` | Después de `cerrarConexion()` sigue entregando el mismo manejador, con la conexión cerrada | CI6 | No se corrige |
+| D5 | `DataAccessObject.cargar` | Lee el `ResultSet` sin llamar a `next()`: lanza `SQLException` incluso para un id existente | CI9, CI10, CI11 | No se corrige |
+| D6 | `BaseDeDatos.ejecutarActualizacion` | Fija `WHERE id = 1` (`setInt(8, 1)`): siempre modifica la fila 1, no la del DNI | CI16, CI17 | No se corrige |
 
-D8 se manifiesta de dos maneras. En CI16 el `UPDATE` intenta poner en la fila 1 el DNI de la fila 7
+D6 se manifiesta de dos maneras. En CI16 el `UPDATE` intenta poner en la fila 1 el DNI de la fila 7
 y MySQL lo rechaza por el `UNIQUE` (`Duplicate entry '22334455'`). En CI17, con un DNI nuevo, la
 fila 1 se sobrescribe sin error: es una pérdida de datos silenciosa.
 
@@ -231,9 +231,9 @@ y la conexión cerrada (CI6).
 ## Conclusiones
 
 - La suite cubre el Singleton, la inicialización y las cuatro operaciones CRUD con 22 casos, y
-  detectó tres defectos nuevos (D5, D7 y D8) que la prueba unitaria no podía ver: todos dependen del
+  detectó tres defectos nuevos (D4, D5 y D6) que la prueba unitaria no podía ver: todos dependen del
   SQL, del esquema o del ciclo de vida de la conexión.
-- La verificación con SQL propio fue determinante en D8: con un DNI nuevo, `actualizar` no lanza
+- La verificación con SQL propio fue determinante en D6: con un DNI nuevo, `actualizar` no lanza
   error y una lectura con el mismo DAO no habría mostrado que se pisó la fila 1.
 - CI21 muestra cómo un defecto unitario (D3) reaparece como error de mapeo en la integración: una
   fila que la SRS considera válida hacía fallar la carga completa de la tabla. Con `AsociadoDTO`

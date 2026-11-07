@@ -102,19 +102,19 @@ celdas de la tabla es una clase y se cubre con un único caso.
 | CM12 | Disponible | Mantenimiento | EnTaller | ✅ |
 | CM13 | Disponible | Retorno clínica | Sin acción | ✅ |
 | CM14 | AtendiendoEnDomicilio | Traslado | Rechaza | ✅ |
-| CM15 | AtendiendoEnDomicilio | Atención domicilio | Rechaza | ❌ D9 |
+| CM15 | AtendiendoEnDomicilio | Atención domicilio | Rechaza | ❌ D7 |
 | CM16 | AtendiendoEnDomicilio | Mantenimiento | Rechaza | ✅ |
 | CM17 | AtendiendoEnDomicilio | Retorno clínica | RegresandoClinicaSinPaciente | ✅ |
 | CM18 | Trasladando | Traslado | Rechaza | ✅ |
-| CM19 | Trasladando | Atención domicilio | Rechaza | ❌ D9 |
+| CM19 | Trasladando | Atención domicilio | Rechaza | ❌ D7 |
 | CM20 | Trasladando | Mantenimiento | Rechaza | ✅ |
-| CM21 | Trasladando | Retorno clínica | Disponible | ❌ D10 |
+| CM21 | Trasladando | Retorno clínica | Disponible | ❌ D8 |
 | CM22 | EnTaller | Traslado | Rechaza | ✅ |
-| CM23 | EnTaller | Atención domicilio | Rechaza | ❌ D9 |
+| CM23 | EnTaller | Atención domicilio | Rechaza | ❌ D7 |
 | CM24 | EnTaller | Mantenimiento | RegresandoDelTaller | ✅ |
-| CM25 | EnTaller | Retorno clínica | Rechaza (S9) | ❌ D9 |
+| CM25 | EnTaller | Retorno clínica | Rechaza (S9) | ❌ D7 |
 | CM26 | RegresandoDelTaller | Traslado | Rechaza | ✅ |
-| CM27 | RegresandoDelTaller | Atención domicilio | Rechaza | ❌ D9 |
+| CM27 | RegresandoDelTaller | Atención domicilio | Rechaza | ❌ D7 |
 | CM28 | RegresandoDelTaller | Mantenimiento | Rechaza | ✅ |
 | CM29 | RegresandoDelTaller | Retorno clínica | Disponible | ✅ |
 | CM30 | RegresandoClinicaSinPaciente | Traslado | Trasladando | ✅ |
@@ -144,14 +144,14 @@ el Apéndice A (`resultados/mock.md`).
 
 | Id | Ubicación | Descripción | Detectado por |
 |----|-----------|-------------|---------------|
-| D9 | `SolicitudDeAtencionDomicilio` de AtendiendoEnDomicilio, Trasladando, EnTaller y RegresandoDelTaller; `EnTallerState.RetornoClinica` | El rechazo no avisa a los observadores: la notificación está comentada en el código | CM15, CM19, CM23, CM25, CM27 |
-| D10 | `TrasladandoPacienteClinicaState.RetornoClinica` | Pasa a `RegresandoDelTallerState` en lugar de `DisponibleState`, contra su propio Javadoc y el UML | CM21 |
+| D7 | `SolicitudDeAtencionDomicilio` de AtendiendoEnDomicilio, Trasladando, EnTaller y RegresandoDelTaller; `EnTallerState.RetornoClinica` | El rechazo no avisa a los observadores: la notificación está comentada en el código | CM15, CM19, CM23, CM25, CM27 |
+| D8 | `TrasladandoPacienteClinicaState.RetornoClinica` | Pasa a `RegresandoDelTallerState` en lugar de `DisponibleState`, contra su propio Javadoc y el UML | CM21 |
 
 ## Conclusiones
 
 - Aislar cada mitad del patrón permitió **ubicar exactamente** dónde está cada falla: la ambulancia
   delega bien (pasan los 9 casos) y los errores están en estados concretos puntuales, sin hilos ni
-  esperas. Con la máquina de estados real, D10 aparece como un estado final incorrecto después de
+  esperas. Con la máquina de estados real, D8 aparece como un estado final incorrecto después de
   un flujo, pero no se ve en cuál de las transiciones está el error.
 - Los mocks permitieron probar la ambulancia antes de tener los estados (consigna: *"ante la
   ausencia temporal de las implementaciones concretas"*) y simular un estado que cambia de estado
