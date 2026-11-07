@@ -1,9 +1,13 @@
-package modelo.modeloDominio.ambulancia;
+package item3;
 
 import modelo.modeloAplicacion.NotificacionSimulacion;
+import modelo.modeloDominio.ambulancia.Ambulancia;
+import modelo.modeloDominio.ambulancia.RetornoAutomatico;
+import modelo.modeloDominio.ambulancia.State;
 import modelo.modeloDominio.personas.asociado.Asociado;
 import modelo.modeloDominio.personas.operario.Operario;
 import modelo.modeloDominio.util.Domicilio;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -17,33 +21,33 @@ import static org.mockito.Mockito.*;
 /**
  * Pruebas de Ambulancia con la interfaz State reemplazada por un mock, sin ningún estado concreto:
  * la ambulancia debe delegar en el estado actual el método que corresponde, una sola vez.
- * Oráculo: .skills/concurrency-testing/references/ambulance-oracle.md §3.
+ * Oráculo: diagrama UML, Javadoc de Ambulancia e informe de diseño.
  */
 @Tag("mock")
 class AmbulanciaMockTest {
 
-    private Ambulancia ambulancia;
-    private State estado;
-    private Observer observador;
-    private Asociado asociado;
-    private Operario operario;
+    private Ambulancia ambulance;
+    private State state;
+    private Observer observer;
+    private Asociado associate;
+    private Operario operator;
 
     /** Ambulancia libre, con la simulación activa, un estado mock y un observador mock. */
     @BeforeEach
-    void setUpAmbulanciaConEstadoMock() {
-        ambulancia = new Ambulancia();
-        estado = mock(State.class);
-        ambulancia.setState(estado);
-        observador = mock(Observer.class);
-        ambulancia.addObserver(observador);
-        Domicilio domicilio = new Domicilio("Calle", 1, "Ciudad");
-        asociado = new Asociado("Ana", "Diaz", "30111222", "2230001111", domicilio);
-        operario = new Operario("Juan", "Perez", "20111222", "2230002222", domicilio, ambulancia);
+    void setUpAmbulanceWithMockState() {
+        ambulance = new Ambulancia();
+        state = mock(State.class);
+        ambulance.setState(state);
+        observer = mock(Observer.class);
+        ambulance.addObserver(observer);
+        Domicilio address = new Domicilio("Calle", 1, "Ciudad");
+        associate = new Asociado("Ana", "Diaz", "30111222", "2230001111", address);
+        operator = new Operario("Juan", "Perez", "20111222", "2230002222", address, ambulance);
     }
 
     /** El observador recibió una notificación de la ambulancia. */
-    private void assertNotificado() {
-        verify(observador).update(same(ambulancia), any(NotificacionSimulacion.class));
+    private void assertObserverNotified() {
+        verify(observer).update(same(ambulance), any(NotificacionSimulacion.class));
     }
 
     // ---------------------------------------------------------------- Pedidos con la ambulancia libre
@@ -52,36 +56,36 @@ class AmbulanciaMockTest {
     // SolicitudDeAtencionDomicilio y nada más, queda ocupada y notifica.
     @Test
     void testAtenderDomicilioDelegatesToState() {
-        ambulancia.atenderDomicilio(asociado);
+        ambulance.atenderDomicilio(associate);
 
-        verify(estado).SolicitudDeAtencionDomicilio();
-        verifyNoMoreInteractions(estado);
-        assertTrue(ambulancia.isOcupado());
-        assertNotificado();
+        verify(state).SolicitudDeAtencionDomicilio();
+        verifyNoMoreInteractions(state);
+        assertTrue(ambulance.isOcupado());
+        assertObserverNotified();
     }
 
     // CM2 – trasladarALaClinica con la ambulancia libre. Esperado: delega una vez
     // SolicitudDeTraslado y nada más, queda ocupada y notifica.
     @Test
     void testTrasladarDelegatesToState() {
-        ambulancia.trasladarALaClinica(asociado);
+        ambulance.trasladarALaClinica(associate);
 
-        verify(estado).SolicitudDeTraslado();
-        verifyNoMoreInteractions(estado);
-        assertTrue(ambulancia.isOcupado());
-        assertNotificado();
+        verify(state).SolicitudDeTraslado();
+        verifyNoMoreInteractions(state);
+        assertTrue(ambulance.isOcupado());
+        assertObserverNotified();
     }
 
     // CM3 – solicitarMantenimiento con la ambulancia libre. Esperado: delega una vez
     // SolicitudMantenimiento y nada más, queda ocupada y notifica.
     @Test
     void testSolicitarMantenimientoDelegatesToState() {
-        ambulancia.solicitarMantenimiento(operario);
+        ambulance.solicitarMantenimiento(operator);
 
-        verify(estado).SolicitudMantenimiento();
-        verifyNoMoreInteractions(estado);
-        assertTrue(ambulancia.isOcupado());
-        assertNotificado();
+        verify(state).SolicitudMantenimiento();
+        verifyNoMoreInteractions(state);
+        assertTrue(ambulance.isOcupado());
+        assertObserverNotified();
     }
 
     // ---------------------------------------------------------------- Liberaciones
@@ -90,37 +94,37 @@ class AmbulanciaMockTest {
     // RetornoClinica, queda libre y notifica.
     @Test
     void testRegresarSinPacienteDelegatesAndReleases() {
-        ambulancia.setOcupado(true);
+        ambulance.setOcupado(true);
 
-        ambulancia.regresarSinPaciente();
+        ambulance.regresarSinPaciente();
 
-        verify(estado).RetornoClinica();
-        verifyNoMoreInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
-        assertNotificado();
+        verify(state).RetornoClinica();
+        verifyNoMoreInteractions(state);
+        assertFalse(ambulance.isOcupado());
+        assertObserverNotified();
     }
 
     // CM5 – volviendoDelTaller con la ambulancia ocupada. Esperado: delega una vez
     // SolicitudMantenimiento (EnTaller → RegresandoDelTaller), queda libre y notifica.
     @Test
     void testVolviendoDelTallerDelegatesAndReleases() {
-        ambulancia.setOcupado(true);
+        ambulance.setOcupado(true);
 
-        ambulancia.volviendoDelTaller();
+        ambulance.volviendoDelTaller();
 
-        verify(estado).SolicitudMantenimiento();
-        verifyNoMoreInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
-        assertNotificado();
+        verify(state).SolicitudMantenimiento();
+        verifyNoMoreInteractions(state);
+        assertFalse(ambulance.isOcupado());
+        assertObserverNotified();
     }
 
     // CM6 – retornoAutomatico. Esperado: delega una vez RetornoClinica.
     @Test
     void testRetornoAutomaticoDelegatesToState() {
-        ambulancia.retornoAutomatico(new RetornoAutomatico(ambulancia));
+        ambulance.retornoAutomatico(new RetornoAutomatico(ambulance));
 
-        verify(estado).RetornoClinica();
-        verifyNoMoreInteractions(estado);
+        verify(state).RetornoClinica();
+        verifyNoMoreInteractions(state);
     }
 
     // ---------------------------------------------------------------- Argumentos nulos
@@ -128,32 +132,32 @@ class AmbulanciaMockTest {
     // CM7 – atenderDomicilio(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
     @Test
     void testAtenderDomicilioRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulancia.atenderDomicilio(null));
-        verifyNoInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
+        assertThrows(AssertionError.class, () -> ambulance.atenderDomicilio(null));
+        verifyNoInteractions(state);
+        assertFalse(ambulance.isOcupado());
     }
 
     // CM8 – trasladarALaClinica(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
     @Test
     void testTrasladarRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulancia.trasladarALaClinica(null));
-        verifyNoInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
+        assertThrows(AssertionError.class, () -> ambulance.trasladarALaClinica(null));
+        verifyNoInteractions(state);
+        assertFalse(ambulance.isOcupado());
     }
 
     // CM9 – solicitarMantenimiento(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
     @Test
     void testSolicitarMantenimientoRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulancia.solicitarMantenimiento(null));
-        verifyNoInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
+        assertThrows(AssertionError.class, () -> ambulance.solicitarMantenimiento(null));
+        verifyNoInteractions(state);
+        assertFalse(ambulance.isOcupado());
     }
 
     // CM10 – setState(null). Esperado: AssertionError y el estado actual sin cambios.
     @Test
     void testSetStateRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulancia.setState(null));
-        assertSame(estado, ambulancia.getEstadoActual());
+        assertThrows(AssertionError.class, () -> ambulance.setState(null));
+        assertSame(state, ambulance.getEstadoActual());
     }
 
     // ---------------------------------------------------------------- Simulación terminada
@@ -162,24 +166,24 @@ class AmbulanciaMockTest {
     // Esperado: vuelve sin delegar en el estado y sin ocuparse.
     @Test
     void testAtenderDomicilioAfterSimulacionDoesNothing() {
-        ambulancia.setSimulacionActiva(false);
+        ambulance.setSimulacionActiva(false);
 
-        ambulancia.atenderDomicilio(asociado);
+        ambulance.atenderDomicilio(associate);
 
-        verifyNoInteractions(estado);
-        assertFalse(ambulancia.isOcupado());
+        verifyNoInteractions(state);
+        assertFalse(ambulance.isOcupado());
     }
 
     // CM12 – trasladarALaClinica con la ambulancia ocupada y la simulación terminada.
     // Esperado: no se queda esperando (vuelve antes de 2 s) y no delega en el estado.
     @Test
     void testTrasladarWhenBusyAfterSimulacionDoesNotWait() {
-        ambulancia.setOcupado(true);
-        ambulancia.setSimulacionActiva(false);
+        ambulance.setOcupado(true);
+        ambulance.setSimulacionActiva(false);
 
-        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> ambulancia.trasladarALaClinica(asociado));
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> ambulance.trasladarALaClinica(associate));
 
-        verifyNoInteractions(estado);
+        verifyNoInteractions(state);
     }
 
     // ---------------------------------------------------------------- Estado mock con comportamiento
@@ -189,16 +193,16 @@ class AmbulanciaMockTest {
     // no en el anterior (la ambulancia siempre delega en su estado actual).
     @Test
     void testDelegatesToStateSetByPreviousTransition() {
-        State otroEstado = mock(State.class);
-        doAnswer(invocacion -> {
-            ambulancia.setState(otroEstado);
+        State otherState = mock(State.class);
+        doAnswer(invocation -> {
+            ambulance.setState(otherState);
             return null;
-        }).when(estado).SolicitudDeTraslado();
+        }).when(state).SolicitudDeTraslado();
 
-        ambulancia.trasladarALaClinica(asociado);
-        ambulancia.regresarSinPaciente();
+        ambulance.trasladarALaClinica(associate);
+        ambulance.regresarSinPaciente();
 
-        verify(otroEstado).RetornoClinica();
-        verify(estado, never()).RetornoClinica();
+        verify(otherState).RetornoClinica();
+        verify(state, never()).RetornoClinica();
     }
 }
