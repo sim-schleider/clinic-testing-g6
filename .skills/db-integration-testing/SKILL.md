@@ -118,7 +118,7 @@ Write steps 1–5 into `docs/informe/secciones/04-integracion-bd.md` in Spanish:
 ```
 # Testing de integración con MySQL
 ## Objetivo y alcance
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 ## Diagramas de secuencia
 ## Estrategia de integración
 ## Estados de los elementos y valores representativos

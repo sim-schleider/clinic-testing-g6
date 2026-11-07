@@ -25,7 +25,7 @@ class AsociadoDTOTest {
      */
     @BeforeEach
     void setUpLoadedAsociado() {
-        dto = new AsociadoDTO("Valentino", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 777, "2236767676");
+        dto = new AsociadoDTO("Marina", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 777, "2236767676");
     }
 
     /** Verifica los siete getters. */
@@ -56,8 +56,8 @@ class AsociadoDTOTest {
     // Clases: V1, V2, V3, V4, V5, V6, V7. Esperado: cada getter devuelve su valor.
     @Test
     void testConstructorAssignsValidData() {
-        AsociadoDTO nuevo = new AsociadoDTO("Valentino", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
-        assertDatos(nuevo, "Valentino", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
+        AsociadoDTO nuevo = new AsociadoDTO("Marina", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
+        assertDatos(nuevo, "Marina", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
     }
 
     // ---------------------------------------------------------------- Setters (E2)
@@ -67,13 +67,13 @@ class AsociadoDTOTest {
     // La documentación solo establece que dni y telefono no pueden ser nulos; no define un formato.
     @Test
     void testStringSettersAssignValidText() {
-        dto.setNombre("Lucas");
-        dto.setApellido("Cauquen");
+        dto.setNombre("Simon");
+        dto.setApellido("Schleider");
         dto.setDni("40111222");
         dto.setCiudad("Bahía Blanca");
         dto.setCalle("San Juan");
         dto.setTelefono("2494001122");
-        assertDatos(dto, "Lucas", "Cauquen", "40111222", "Bahía Blanca", "San Juan", 777, "2494001122");
+        assertDatos(dto, "Simon", "Schleider", "40111222", "Bahía Blanca", "San Juan", 777, "2494001122");
     }
 
     // CU4 – setNumero(0). Clase V14, valor límite (frontera exacta).
@@ -81,6 +81,6 @@ class AsociadoDTOTest {
     @Test
     void testSetNumeroAcceptsZero() {
         dto.setNumero(0);
-        assertDatos(dto, "Valentino", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
+        assertDatos(dto, "Marina", "Lombardo", "40000000", "Mar del Plata", "Ratiery", 0, "2236767676");
     }
 }

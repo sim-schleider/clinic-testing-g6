@@ -115,7 +115,7 @@ Write steps 1–3 into `docs/informe/secciones/06-concurrencia.md` in Spanish:
 ```
 # Testing de integración y concurrencia: máquina de estados de la Ambulancia
 ## Objetivo y alcance
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 ## Recursos compartidos e hilos
 ## Tabla de transiciones de estado
 ## Casos de prueba

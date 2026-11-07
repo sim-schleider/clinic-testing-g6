@@ -71,7 +71,7 @@ Appendices carry `{.unnumbered}`.
 
 A good row lets a reader reproduce the defect without the code open:
 
-| ID | Componente | Descripción | Oráculo violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
+| ID | Componente | Descripción | Criterio de validación violado | Detectado por | Esperado | Obtenido | Severidad | Estado |
 |----|------------|-------------|-----------------|---------------|----------|----------|-----------|--------|
 | D3 | `AsociadoDTO.setNumero` | Rechaza el número 0, que la SRS admite | SRS §3.1: "Debe ser mayor o igual a 0" | CU10 | `numero = 0` aceptado | `AssertionError` | Media | Corregido (`a1b2c3d`) |
 

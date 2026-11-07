@@ -93,7 +93,7 @@ Write the design into `docs/informe/secciones/05-mocks.md` in Spanish:
 ```
 # Testing con mocks: Ambulancia y la interfaz State
 ## Objetivo y alcance
-## Oráculo y supuestos
+## Criterio de validación y supuestos
 ## Diseño: componentes reales y dobles de prueba
 ## Casos de prueba
 ### Ambulancia con State simulado
@@ -108,7 +108,7 @@ Write the design into `docs/informe/secciones/05-mocks.md` in Spanish:
 
 Read `references/mockito5-patterns.md`.
 
-- Use `AmbulanciaMockTest` and `EstadosMockTest` in package `item3`,
+- Use `AmbulanciaMockTest` and `StatesMockTest` in package `item3`,
   with `@Tag("mock")` and `@ExtendWith(MockitoExtension.class)`.
 - One method per case (`cm3_atenderDomicilioDelegaEnEstado`) with
   `@DisplayName("CM3 – ...")`. Group B can be a `@ParameterizedTest` over the 24 cells, with

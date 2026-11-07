@@ -74,7 +74,7 @@ class DatabaseIntegrationTest {
     @Test
     void testIniciarBDRecreatesTable() throws SQLException {
         DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
-                + "VALUES ('Extra', 'Extra', '99999999', 'Calle', 1, 'Ciudad', '1')");
+                + "VALUES ('Lucas', 'Paniagua', '99999999', 'Calle', 1, 'Ciudad', '1')");
         assertEquals(21, DatabaseTestSupport.countRows(), "preparación: la fila extra debía insertarse");
 
         bd.iniciarBD();

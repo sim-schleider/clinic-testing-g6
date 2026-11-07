@@ -119,7 +119,7 @@ Use `InOrder` only where the oracle defines an order. Otherwise it over-specifie
 @Tag("mock")
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Estados concretos con Ambulancia simulada")
-class EstadosMockTest {
+class StatesMockTest {
 
     @Mock Ambulancia ambulancia;
 

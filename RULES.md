@@ -23,7 +23,7 @@ Si hay conflicto con otro documento del repo, rige este archivo.
   con estado `No se corrige: fuera de alcance (solo testing)` y su test queda fallando.
   Ese test en rojo es la evidencia de detección que pide la consigna.
 
-## 2. El oráculo es la especificación
+## 2. Los resultados esperados salen de la especificación
 
 - Los resultados esperados salen de la SRS (`docs/SRS_Persistencia_Clinica.md`), la consigna,
   el diagrama UML, el Javadoc y el informe de diseño (`docs/Informe.md`).

@@ -11,7 +11,7 @@
 
 TODO: justificar por qué cada consigna se aborda en ese nivel.
 
-## Oráculo de las pruebas
+## Criterio de validación de las pruebas
 
 TODO: el resultado esperado de cada caso surge de la especificación (SRS, enunciado, diagramas UML,
 contratos Javadoc e informe de diseño), nunca del comportamiento actual del código. Lo que la
