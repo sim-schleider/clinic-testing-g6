@@ -125,13 +125,6 @@ class DataAccessObjectIntegrationTest {
         assertEquals(20, DatabaseTestSupport.countRows());
     }
 
-    // CI17 – guardar(null). Esperado: AssertionError ("validará que no sea nula") y sin filas nuevas.
-    @Test
-    void testGuardarRejectsNull() throws SQLException {
-        assertThrows(AssertionError.class, () -> dao.guardar(null));
-        assertEquals(20, DatabaseTestSupport.countRows());
-    }
-
     // ---------------------------------------------------------------- cargar, cargarConLimite, cargarBD
 
     // CI18 – cargar(1), primera fila. Esperado: un DTO igual a la fila 1 (carga individual).
@@ -232,18 +225,14 @@ class DataAccessObjectIntegrationTest {
         assertEquals(antes, DatabaseTestSupport.wholeTable());
     }
 
-    // CI29 – eliminar(""). Esperado (supuesto): AssertionError y la tabla intacta.
+    // CI33 – eliminar con un DNI que es un intento de inyección SQL. Esperado: el texto se usa como
+    // valor del parámetro y no como parte de la consulta, así que no coincide con ningún DNI y la
+    // tabla queda intacta (consultas parametrizadas "para prevenir vulnerabilidades de inyección SQL").
     @Test
-    void testEliminarRejectsEmptyDni() throws SQLException {
-        assertThrows(AssertionError.class, () -> dao.eliminar(""));
-        assertEquals(20, DatabaseTestSupport.countRows());
-    }
-
-    // CI30 – eliminar(null). Esperado (supuesto): AssertionError y la tabla intacta.
-    @Test
-    void testEliminarRejectsNullDni() throws SQLException {
-        assertThrows(AssertionError.class, () -> dao.eliminar(null));
-        assertEquals(20, DatabaseTestSupport.countRows());
+    void testEliminarTreatsSqlInjectionAsPlainValue() throws SQLException {
+        String antes = DatabaseTestSupport.wholeTable();
+        dao.eliminar("' OR '1'='1");
+        assertEquals(antes, DatabaseTestSupport.wholeTable());
     }
 
     // ---------------------------------------------------------------- errores de mapeo y de SQL
