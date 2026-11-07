@@ -7,7 +7,8 @@ Testing strategy over the "Clínica" Java app (TP final de Calidad de Software).
 3. Mock tests of `Ambulancia` through the `State` interface, plus integration and concurrency
    tests of the state machine with `RetornoAutomatico` and other threads.
 
-Deliverables: the test suites, red and green screenshots, and a report (informe) with the formal
+Deliverables: the test suites, screenshots of each suite's run showing which tests pass (green)
+and which fail (red), and a report (informe) with the formal
 scenario design, test cases (equivalence classes and boundary values), results and conclusions.
 
 ## Skills
@@ -18,7 +19,7 @@ scenario design, test cases (equivalence classes and boundary values), results a
 | `db-integration-testing` | DTO → DAO → BaseDeDatos against real MySQL |
 | `mock-testing` | Ambulancia with a mocked `State`, and states with a mocked `Ambulancia` |
 | `concurrency-testing` | Real state machine, `synchronized`/`wait`/`notifyAll`, `RetornoAutomatico` and other threads |
-| `test-report` | Running suites for red/green evidence, listing the required screenshots, defect registry, assembling and exporting the informe |
+| `test-report` | Running suites for the evidence, listing the required screenshots, defect registry, assembling and exporting the informe |
 
 **Setup:** Claude Code discovers project skills in `.claude/skills/`. Link that folder to this one
 once per clone, `mkdir -p .claude && ln -s ../.skills .claude/skills`, and import these
@@ -31,8 +32,8 @@ link.
 - Java 17, Maven, JUnit 5.10 (Jupiter), Mockito 5.11, MySQL 8 (`docker-compose.yml`).
 - Surefire runs with `-ea`: production code validates with Java `assert`, so invalid-input tests
   expect `AssertionError`. Without `-ea` those tests give false reds.
-- Run everything through `.skills/test-report/scripts/run_tests.sh <suite> <fase>`
-  (suite: `unit` | `integration` | `mock` | `concurrency` | `all`; fase: `rojo` | `verde` | `dev`).
+- Run everything through `.skills/test-report/scripts/run_tests.sh <suite> [--dev]`
+  (suite: `unit` | `integration` | `mock` | `concurrency` | `all`; `--dev` prints without saving).
   It uses local `mvn` if present, otherwise `docker compose`. Under WSL, Docker needs
   "WSL integration" enabled in Docker Desktop. If neither works, the user runs `mvn test` from
   IntelliJ and the script is called with `--no-run` to summarize `target/surefire-reports`.
@@ -46,26 +47,29 @@ link.
   Never the current behaviour of the code. A test that fails because the code disagrees with
   the spec is a finding, not a broken test. Gaps in the spec are written down as *supuestos*.
 - **Production code changes only with the user's OK**, one defect per commit
-  (`fix(<scope>): ...`), so each red→green transition maps to a commit in the report.
+  (`fix(<scope>): ...`), so each fix maps to a commit in the defect registry.
 - **Known build blocker**: `EnTallerState.java` declares `package model...` instead of
   `modelo...`, and `TrasladandoPacienteClinicasState.java` holds the public class
   `TrasladandoPacienteClinicaState`. Nothing compiles until both are fixed (with the user's OK);
   register them as the first defects.
-- **Red/green cycle**: (1) write the suite, (2) run `rojo` on the original code (only the build
-  fixes applied), (3) fix defects with the user's OK, (4) run `verde`, (5) seed faults on the
-  green code to prove the suite catches them. Never commit a seeded fault.
+- **One run per suite**: (1) write the suite, (2) run it once on the code of the item's branch
+  (only the build fixes applied in a temporary copy) and save the results, (3) every failing test
+  is a defect in the registry. There are no separate "before/after" runs: the screenshot of that
+  run shows the passing tests (green) and the failing ones (red). Seeded faults live in
+  `src/test` only; never commit a seeded fault in `src/main`.
 - **No commits or pushes** unless the user asks for them.
 
 ## Conventions
 
-- Test classes in `src/test/java`, same package as the class under test, name ends in `Test`,
+- Test classes in `src/test/java`, one package per assignment item (`item1`, `item2`, `item3`),
+  importing the production classes they test; name ends in `Test`,
   class-level `@Tag("unit" | "integration" | "mock" | "concurrency")`.
 - Case IDs: `CU` unit, `CI` DB integration, `CM` mocks, `CC` concurrency; `D` defects;
   `FU`/`FI`/`FM`/`FC` seeded faults. Every test method starts with its ID (`cu3_numeroCeroValido`)
   and has `@DisplayName("CU3 – ...")`; parameterized rows put the ID in the first argument and use
   `name = "{0} – ..."`. That is how results are matched back to the design tables.
-- Deliverables (tables, report text) are written in Spanish; code identifiers follow the existing
-  Spanish naming.
+- Deliverables (tables, report text) are written in Spanish. Test-code identifiers (classes,
+  helpers, variables) are in English; production code keeps its Spanish names.
 
 ## Report layout (`docs/informe/`)
 

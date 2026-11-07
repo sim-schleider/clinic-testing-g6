@@ -84,38 +84,39 @@ def main() -> int:
         if section in texts and "Escenario" not in texts[section] and "escenario" not in texts[section]:
             r.add("⚠", f"{section}: no menciona escenarios")
 
-    r.title("Resultados y capturas en verde y en rojo")
+    r.title("Resultados y capturas (tests en verde y en rojo)")
     executed = {}
     for suite in SUITES:
-        for fase in ("rojo", "verde"):
-            summary = informe / "resultados" / f"{suite}-{fase}.md"
-            png = informe / "capturas" / f"{suite}-{fase}.png"
-            text = read(summary)
-            if not text:
-                r.add("❌", f"falta resultados/{suite}-{fase}.md (run_tests.sh {suite} {fase})")
-                continue
-            rows = [m.groupdict() for m in RESULT_ROW.finditer(text)]
-            failing = [x for x in rows if x["status"] in ("fail", "error")]
-            executed.setdefault(suite, {})[fase] = rows
-            if "CON cambios sin commitear" in text:
-                r.add("❌", f"{suite}-{fase}: se ejecutó con cambios sin commitear en src/main (¿falla sembrada?)")
-            if fase == "rojo" and not failing:
-                r.add("⚠", f"{suite}-rojo no tiene tests fallidos: no demuestra detección de errores")
-            if fase == "verde" and failing:
-                ids = sorted({x["id"] or "?" for x in failing})
-                r.add("⚠", f"{suite}-verde tiene {len(failing)} fallidos ({', '.join(ids)}): justificarlos en 07-defectos.md")
-            r.add("✅" if png.exists() else "❌", f"capturas/{suite}-{fase}.png" if png.exists()
-                  else f"falta capturas/{suite}-{fase}.png: la toma el equipo desde el IDE (ver Apéndice B)")
+        summary = informe / "resultados" / f"{suite}.md"
+        png = informe / "capturas" / f"{suite}.png"
+        text = read(summary)
+        if not text:
+            r.add("❌", f"falta resultados/{suite}.md (run_tests.sh {suite})")
+            continue
+        rows = [m.groupdict() for m in RESULT_ROW.finditer(text)]
+        failing = [x for x in rows if x["status"] in ("fail", "error")]
+        executed[suite] = rows
+        if "CON cambios sin commitear" in text:
+            r.add("❌", f"{suite}: se ejecutó con cambios sin commitear en src/main (¿falla sembrada?)")
+        if not failing:
+            r.add("⚠", f"{suite} no tiene tests fallidos: no demuestra detección de errores")
+        else:
+            ids = sorted({x["id"] or "?" for x in failing})
+            r.add("✅", f"{suite}: {len(failing)} fallidos ({', '.join(ids)}): cada uno debe tener su defecto en 07-defectos.md")
+        if len(failing) == len(rows):
+            r.add("⚠", f"{suite} no tiene tests que pasen: no muestra funcionamiento correcto")
+        r.add("✅" if png.exists() else "❌", f"capturas/{suite}.png" if png.exists()
+              else f"falta capturas/{suite}.png: la toma el equipo desde el IDE (ver Apéndice B)")
 
     r.title("Trazabilidad diseño ↔ ejecución")
     for suite, ids in designed.items():
-        ran = {x["id"] for rows in executed.get(suite, {}).values() for x in rows if x["id"]}
+        ran = {x["id"] for x in executed.get(suite, []) if x["id"]}
         if not ran:
             continue
         missing, extra = sorted(ids - ran), sorted(ran - ids)
         r.add("⚠" if missing else "✅", f"{SUITES[suite]}: casos diseñados sin ejecutar: {', '.join(missing) or 'ninguno'}")
         r.add("⚠" if extra else "✅", f"{SUITES[suite]}: tests ejecutados sin fila en el diseño: {', '.join(extra) or 'ninguno'}")
-        no_id = sum(1 for rows in executed[suite].values() for x in rows if not x["id"])
+        no_id = sum(1 for x in executed[suite] if not x["id"])
         if no_id:
             r.add("⚠", f"{SUITES[suite]}: {no_id} test(s) sin Id de caso en el nombre")
 

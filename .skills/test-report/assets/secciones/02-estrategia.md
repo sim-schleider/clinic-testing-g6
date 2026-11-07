@@ -17,13 +17,15 @@ TODO: el resultado esperado de cada caso surge de la especificación (SRS, enunc
 contratos Javadoc e informe de diseño), nunca del comportamiento actual del código. Lo que la
 especificación no define se documenta como supuesto en cada sección.
 
-## Ciclo rojo / verde y fallas sembradas
+## Ejecución de las suites y fallas sembradas
 
 TODO: describir el procedimiento:
-1. Se ejecuta cada suite sobre el código original y se obtiene la evidencia en rojo.
-2. Se corrige cada defecto en un commit propio.
-3. Se ejecuta nuevamente y se obtiene la evidencia en verde.
-4. Se siembran fallas sobre el código corregido, para demostrar que la suite las detecta.
+1. Cada suite se ejecuta una vez, sobre el código de su punto de la consigna, y su resultado
+   muestra qué casos pasan (verde) y cuáles fallan (rojo).
+2. Cada caso que falla se revisa contra el código y su defecto se anota en el registro.
+3. Los defectos que la consigna pide corregir se corrigen en un commit propio.
+4. Las fallas se siembran desde los tests (dobles de prueba, estados forzados), para demostrar que
+   la suite las detecta.
 
 ## Entorno y herramientas
 

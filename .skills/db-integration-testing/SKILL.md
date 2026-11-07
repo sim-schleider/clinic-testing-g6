@@ -11,7 +11,7 @@ This skill produces:
 - the table of element states and representative values,
 - the integration case table,
 - JUnit 5 tests against the real MySQL,
-- red/green results and the defects found,
+- the results of the run and the defects found,
 - the report section `docs/informe/secciones/04-integracion-bd.md`, written in Spanish.
 
 The project conventions are in `.skills/CONVENTIONS.md`.
@@ -138,7 +138,7 @@ Read `references/jdbc-patterns.md`. It covers:
 - exception assertions,
 - the "server down" run.
 
-- Classes with `@Tag("integration")`, for example `BaseDeDatosIntegrationTest` (Singleton,
+- Classes with `@Tag("integration")`, for example `DatabaseIntegrationTest` (Singleton,
   schema, seed data) and `DataAccessObjectIntegrationTest` (CRUD, errors, mapping).
 - One method per case (`ci4_guardarPersisteTodasLasColumnas`) with `@DisplayName("CI4 – ...")`.
 - `@BeforeEach` restores the seed data. Every test that touches the DB has `@Timeout`, so a hung
@@ -149,8 +149,8 @@ Read `references/jdbc-patterns.md`. It covers:
 ### 7. Run
 
 ```bash
-.skills/test-report/scripts/run_tests.sh integration dev    # starts MySQL via docker compose
-.skills/test-report/scripts/run_tests.sh integration rojo   # evidence on the original code
+.skills/test-report/scripts/run_tests.sh integration --dev   # starts MySQL via docker compose
+.skills/test-report/scripts/run_tests.sh integration         # evidence: one run, saved
 ```
 
 The "server down" cases need a separate run with MySQL stopped (see `jdbc-patterns.md` §6).
@@ -168,12 +168,12 @@ Classify each red first:
   expected, obtained and severity. Fill in `Resultado` in the case table.
 
 Then propose fixes to the user. The assignment explicitly allows correcting the code, but each
-fix needs the user's OK and its own commit (`fix(persistencia): ...`). Capture `rojo` **before**
-fixing anything, then `verde` after all approved fixes.
+fix needs the user's OK and its own commit (`fix(persistencia): ...`). The evidence is a single
+run on the branch's code, fixes included.
 
 ### 9. Seed faults (after green)
 
-Introduce one fault at a time, run `integration dev`, record what caught it, then restore with
+Introduce one fault at a time, run `integration --dev`, record what caught it, then restore with
 `git checkout -- <file>`. Good faults here:
 
 - swap two `setString` indexes in an insert,
@@ -186,7 +186,7 @@ Record them in the "Fallas sembradas" table with IDs `FI1…`.
 
 ### 10. Results and conclusions
 
-"Resultados" gives the counts for red and green, the commits of the fixes, and a pointer to the
+"Resultados" gives how many tests pass and how many fail, the commits of the fixes, and a pointer to the
 appendix. "Conclusiones" covers:
 - the defects found, separated into SQL exceptions, mapping errors and inconsistencies (the
   three kinds the assignment names),
@@ -204,7 +204,7 @@ appendix. "Conclusiones" covers:
 - Change the URL, user or password in `BaseDeDatos` to make the tests connect. Adapt the
   container instead.
 - Simulate "server down" by pausing the container mid-run (tests hang). Use the separate run.
-- Fix production code without the user's OK, or before the red evidence is captured.
+- Fix production code without the user's OK.
 
 ## References
 
