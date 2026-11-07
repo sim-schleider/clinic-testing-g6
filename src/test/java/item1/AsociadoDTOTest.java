@@ -1,4 +1,6 @@
-package persistencia;
+package item1;
+
+import persistencia.AsociadoDTO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;

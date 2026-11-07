@@ -59,7 +59,7 @@ el constructor y para cada setter) quedan fuera del dominio por precondición.
 
 | Qué | Dónde |
 |-----|-------|
-| Suite de 4 casos (CU1–CU4), solo clases válidas y el valor límite 0 | `src/test/java/persistencia/AsociadoDTOTest.java` |
+| Suite de 4 casos (CU1–CU4), solo clases válidas y el valor límite 0 | `src/test/java/item1/AsociadoDTOTest.java` |
 | Sección del informe (oráculo con precondiciones, supuestos S1–S3, clases V1–V14, casos, resultados, conclusiones) | `docs/informe/secciones/03-unitarias.md` |
 | Defecto D3 (`setNumero` rechaza 0) | `docs/informe/secciones/07-defectos.md` |
 | Ejecución en rojo | `docs/informe/resultados/unit-rojo.md` y `.log`: **desactualizados**, todavía tienen los 18 casos |

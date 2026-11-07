@@ -127,7 +127,7 @@ why there are no cases for the inputs outside the domain.
 Read `references/junit5-unit.md` for the class skeleton, the `-ea` guard, parameterized rows with
 IDs, and the assertion patterns.
 
-- `<Clase>Test` in the same package as the class, with `@Tag("unit")`.
+- `<Clase>Test` in package `item1` (one package per assignment item), with `@Tag("unit")`.
 - One method per case (`cu3_numeroCeroValido`) with `@DisplayName("CU3 – ...")`. Homogeneous rows
   can share a `@ParameterizedTest` whose first argument is the case ID.
 - Observe results only through the public API. Check **all** getters after a setter, not just

@@ -137,7 +137,7 @@ threads that capture their exceptions, thread dumps, deadlock detection and clea
 
 - Use `AmbulanciaStateMachineTest` (single-threaded flows) and `AmbulanciaConcurrencyTest` /
   `RetornoAutomaticoConcurrencyTest` (threads), all with `@Tag("concurrency")`, in package
-  `modelo.modeloDominio.ambulancia`.
+  `item3`.
 - One method per case (`cc4_segundoPedidoEsperaHastaLiberar`) with `@DisplayName("CC4 – ...")`.
 - Put `@Timeout` on every test, chosen from the real intervals. `RetornoAutomatico` waits 10 s,
   so its tests need about 15–25 s, and the others about 5 s.

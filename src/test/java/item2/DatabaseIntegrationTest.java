@@ -1,4 +1,7 @@
-package persistencia;
+package item2;
+
+import item2.support.DatabaseTestSupport;
+import persistencia.BaseDeDatos;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -8,7 +11,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static persistencia.BaseDeDatosDePrueba.*;
 
 /**
  * Pruebas de integración de BaseDeDatos contra MySQL real (SRS §3.2): Singleton de la conexión,
@@ -16,14 +18,14 @@ import static persistencia.BaseDeDatosDePrueba.*;
  * usuario de docker-compose.yml.
  */
 @Tag("integration")
-class BaseDeDatosIntegrationTest {
+class DatabaseIntegrationTest {
 
     private BaseDeDatos bd;
 
     /** Cada test parte de un Singleton recién creado: tabla recreada y 20 datos semilla. */
     @BeforeEach
     void setUpBaseDeDatos() throws Exception {
-        bd = reiniciarBaseDeDatos();
+        bd = DatabaseTestSupport.resetDatabase();
     }
 
     // CI1 – Dos llamadas a getInstancia(). Esperado: la misma instancia (SRS §3.2, Singleton).
@@ -36,17 +38,19 @@ class BaseDeDatosIntegrationTest {
     // esquema Grupo_7 (SRS §3.2, "verificar o crear el esquema de base de datos objetivo").
     @Test
     void testIniciarBDCreatesSchema() throws Exception {
-        ejecutar("DROP DATABASE IF EXISTS Grupo_7");
-        reiniciarBaseDeDatos();
+        DatabaseTestSupport.execute("DROP DATABASE IF EXISTS Grupo_7");
+        DatabaseTestSupport.resetDatabase();
 
-        assertEquals("1", valor("SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'Grupo_7'"));
+        assertEquals("1", DatabaseTestSupport.queryValue(
+                "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'Grupo_7'"));
     }
 
     // CI3 – Inicialización. Esperado: la tabla Asociados tiene una columna por cada atributo del
     // asociado (SRS §3.1) más el id. Se comparan en orden alfabético: el orden no está especificado.
     @Test
     void testIniciarBDCreatesTableWithColumns() throws SQLException {
-        String columnas = valor("SELECT GROUP_CONCAT(LOWER(column_name) ORDER BY column_name SEPARATOR ' ') "
+        String columnas = DatabaseTestSupport.queryValue(
+                "SELECT GROUP_CONCAT(LOWER(column_name) ORDER BY column_name SEPARATOR ' ') "
                 + "FROM information_schema.columns WHERE table_schema = 'Grupo_7' AND table_name = 'Asociados'");
 
         assertEquals("apellido calle ciudad dni id nombre numero telefono", columnas);
@@ -57,24 +61,26 @@ class BaseDeDatosIntegrationTest {
     // SRS §3.1: campos no nulos, numero >= 0 y DNI distintos.
     @Test
     void testIniciarBDLoadsValidSeedData() throws SQLException {
-        assertEquals(20, contarFilas(), "cantidad de datos semilla");
-        assertEquals("", filas("nombre IS NULL OR apellido IS NULL OR DNI IS NULL OR calle IS NULL "
+        assertEquals(20, DatabaseTestSupport.countRows(), "cantidad de datos semilla");
+        assertEquals("", DatabaseTestSupport.rowsWhere(
+                "nombre IS NULL OR apellido IS NULL OR DNI IS NULL OR calle IS NULL "
                 + "OR ciudad IS NULL OR telefono IS NULL OR numero < 0"), "filas semilla que violan la SRS");
-        assertEquals("20", valor("SELECT COUNT(DISTINCT DNI) FROM Asociados"), "los DNI debían ser distintos");
+        assertEquals("20", DatabaseTestSupport.queryValue("SELECT COUNT(DISTINCT DNI) FROM Asociados"),
+                "los DNI debían ser distintos");
     }
 
     // CI5 – iniciarBD() con una fila extra en la tabla. Esperado: la tabla se recrea y vuelve a
     // tener solo los datos semilla (SRS §3.2, "eliminar y recrear la tabla Asociados").
     @Test
     void testIniciarBDRecreatesTable() throws SQLException {
-        ejecutar("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
+        DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
                 + "VALUES ('Extra', 'Extra', '99999999', 'Calle', 1, 'Ciudad', '1')");
-        assertEquals(21, contarFilas(), "preparación: la fila extra debía insertarse");
+        assertEquals(21, DatabaseTestSupport.countRows(), "preparación: la fila extra debía insertarse");
 
         bd.iniciarBD();
 
-        assertEquals(20, contarFilas());
-        assertEquals("", filas("DNI = '99999999'"), "la fila extra debía desaparecer");
+        assertEquals(20, DatabaseTestSupport.countRows());
+        assertEquals("", DatabaseTestSupport.rowsWhere("DNI = '99999999'"), "la fila extra debía desaparecer");
     }
 
     // CI6 – cerrarConexion() y luego getInstancia(). Esperado (supuesto): el Singleton sigue
@@ -93,7 +99,7 @@ class BaseDeDatosIntegrationTest {
     // porque el DNI "no puede ser nulo; actúa como identificador único" (SRS §3.1).
     @Test
     void testSchemaRejectsNullDni() {
-        assertThrows(SQLException.class, () -> ejecutar(
+        assertThrows(SQLException.class, () -> DatabaseTestSupport.execute(
                 "INSERT INTO Asociados (nombre, apellido, calle, numero, ciudad, telefono) "
                         + "VALUES ('Sin', 'Dni', 'Calle', 1, 'Ciudad', '1')"),
                 "la tabla aceptó un asociado con DNI nulo");

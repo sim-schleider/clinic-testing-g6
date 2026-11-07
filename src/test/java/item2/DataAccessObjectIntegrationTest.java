@@ -1,7 +1,11 @@
-package persistencia;
+package item2;
 
+import item2.support.DatabaseTestSupport;
 import modelo.modeloDominio.personas.asociado.Asociado;
 import modelo.modeloDominio.util.Domicilio;
+import persistencia.AsociadoDTO;
+import persistencia.DataAccessObject;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,11 +15,10 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static persistencia.BaseDeDatosDePrueba.*;
 
 /**
  * Pruebas de integración AsociadoDTO → DataAccessObject → BaseDeDatos → MySQL real (SRS §3.3).
- * Cada escritura se verifica con SQL propio (BaseDeDatosDePrueba), nunca leyendo con el mismo DAO.
+ * Cada escritura se verifica con SQL propio (DatabaseTestSupport), nunca leyendo con el mismo DAO.
  * Los valores límite salen del esquema que crea iniciarBD() (la SRS no fija largos): VARCHAR(30) para
  * nombre, apellido y calle, VARCHAR(35) para ciudad, VARCHAR(10) para DNI y VARCHAR(15) para telefono.
  * Supuestos: un texto más largo que su columna produce SQLException (MySQL 8 en modo estricto), y las
@@ -29,7 +32,7 @@ class DataAccessObjectIntegrationTest {
     /** Cada test parte de la tabla recreada con los 20 datos semilla. */
     @BeforeEach
     void setUpDao() throws Exception {
-        reiniciarBaseDeDatos();
+        DatabaseTestSupport.resetDatabase();
         dao = new DataAccessObject();
     }
 
@@ -47,7 +50,7 @@ class DataAccessObjectIntegrationTest {
     /** guardar debe fallar con SQLException y no insertar ninguna fila. */
     private void assertGuardarRechazado(Asociado asociado) throws SQLException {
         assertThrows(SQLException.class, () -> dao.guardar(asociado));
-        assertEquals(20, contarFilas(), "no debía insertarse ninguna fila");
+        assertEquals(20, DatabaseTestSupport.countRows(), "no debía insertarse ninguna fila");
     }
 
     // ---------------------------------------------------------------- guardar
@@ -57,8 +60,9 @@ class DataAccessObjectIntegrationTest {
     void testGuardarInsertsEveryColumn() throws SQLException {
         dao.guardar(asociadoValido());
 
-        assertEquals(21, contarFilas());
-        assertEquals("Nombre|Apellido|40111222|Calle|777|Ciudad|2230001111\n", filas("DNI = '40111222'"));
+        assertEquals(21, DatabaseTestSupport.countRows());
+        assertEquals("Nombre|Apellido|40111222|Calle|777|Ciudad|2230001111\n",
+                DatabaseTestSupport.rowsWhere("DNI = '40111222'"));
     }
 
     // CI9 – guardar con cada texto en su largo máximo (valor límite válido). Esperado: se guarda completo.
@@ -68,7 +72,8 @@ class DataAccessObjectIntegrationTest {
                 "M".repeat(35), "2".repeat(15)));
 
         assertEquals("N".repeat(30) + "|" + "A".repeat(30) + "|" + "1".repeat(10) + "|" + "C".repeat(30)
-                + "|1|" + "M".repeat(35) + "|" + "2".repeat(15) + "\n", filas("DNI = '1111111111'"));
+                + "|1|" + "M".repeat(35) + "|" + "2".repeat(15) + "\n",
+                DatabaseTestSupport.rowsWhere("DNI = '1111111111'"));
     }
 
     // CI10 a CI15: guardar con un texto un carácter más largo que su columna (valor límite
@@ -117,14 +122,14 @@ class DataAccessObjectIntegrationTest {
         Asociado repetido = asociado("Nombre", "Apellido", "12345678", "Calle", 777, "Ciudad", "2230001111");
 
         assertThrows(SQLIntegrityConstraintViolationException.class, () -> dao.guardar(repetido));
-        assertEquals(20, contarFilas());
+        assertEquals(20, DatabaseTestSupport.countRows());
     }
 
     // CI17 – guardar(null). Esperado: AssertionError (SRS §3.3, "validará que no sea nula") y sin filas nuevas.
     @Test
     void testGuardarRejectsNull() throws SQLException {
         assertThrows(AssertionError.class, () -> dao.guardar(null));
-        assertEquals(20, contarFilas());
+        assertEquals(20, DatabaseTestSupport.countRows());
     }
 
     // ---------------------------------------------------------------- cargar, cargarConLimite, cargarBD
@@ -133,14 +138,14 @@ class DataAccessObjectIntegrationTest {
     @Test
     void testCargarFirstRow() throws SQLException {
         AsociadoDTO dto = assertDoesNotThrow(() -> dao.cargar(1));
-        assertEquals(filas("id = 1"), comoFila(dto));
+        assertEquals(DatabaseTestSupport.rowsWhere("id = 1"), DatabaseTestSupport.asRow(dto));
     }
 
     // CI19 – cargar(20), última fila. Esperado: un DTO igual a la fila 20.
     @Test
     void testCargarLastRow() throws SQLException {
         AsociadoDTO dto = assertDoesNotThrow(() -> dao.cargar(20));
-        assertEquals(filas("id = 20"), comoFila(dto));
+        assertEquals(DatabaseTestSupport.rowsWhere("id = 20"), DatabaseTestSupport.asRow(dto));
     }
 
     // CI20 – cargar(21), id inexistente. Esperado (supuesto): devuelve null, sin excepción.
@@ -156,7 +161,7 @@ class DataAccessObjectIntegrationTest {
         ArrayList<AsociadoDTO> dtos = dao.cargarConLimite(1);
 
         assertEquals(1, dtos.size());
-        assertEquals(filas("id = 1"), comoFila(dtos.get(0)));
+        assertEquals(DatabaseTestSupport.rowsWhere("id = 1"), DatabaseTestSupport.asRow(dtos.get(0)));
     }
 
     // CI22 – cargarConLimite(20), límite igual a la cantidad de filas. Esperado: 20 elementos.
@@ -176,9 +181,9 @@ class DataAccessObjectIntegrationTest {
     void testCargarBDReturnsWholeTable() throws SQLException {
         StringBuilder cargado = new StringBuilder();
         for (AsociadoDTO dto : dao.cargarBD()) {
-            cargado.append(comoFila(dto));
+            cargado.append(DatabaseTestSupport.asRow(dto));
         }
-        assertEquals(tablaCompleta(), cargado.toString());
+        assertEquals(DatabaseTestSupport.wholeTable(), cargado.toString());
     }
 
     // ---------------------------------------------------------------- actualizar
@@ -188,24 +193,24 @@ class DataAccessObjectIntegrationTest {
     // únicos como el número de documento (DNI)").
     @Test
     void testActualizarChangesOnlyThatDni() throws SQLException {
-        String otrasFilas = filas("id <> 7");
+        String otrasFilas = DatabaseTestSupport.rowsWhere("id <> 7");
         Asociado cambiado = asociado("Laura", "Singleton", "22334455", "Nueva", 99, "Batan", "2230009999");
 
         assertDoesNotThrow(() -> dao.actualizar(cambiado));
 
-        assertEquals("Laura|Singleton|22334455|Nueva|99|Batan|2230009999\n", filas("id = 7"));
-        assertEquals(otrasFilas, filas("id <> 7"), "no debía cambiar ninguna otra fila");
+        assertEquals("Laura|Singleton|22334455|Nueva|99|Batan|2230009999\n", DatabaseTestSupport.rowsWhere("id = 7"));
+        assertEquals(otrasFilas, DatabaseTestSupport.rowsWhere("id <> 7"), "no debía cambiar ninguna otra fila");
     }
 
     // CI26 – actualizar un DNI que no está en la tabla. Esperado (supuesto): sin excepción y
     // ninguna fila cambia.
     @Test
     void testActualizarMissingDniChangesNothing() throws SQLException {
-        String antes = tablaCompleta();
+        String antes = DatabaseTestSupport.wholeTable();
 
         assertDoesNotThrow(() -> dao.actualizar(asociadoValido()));
 
-        assertEquals(antes, tablaCompleta());
+        assertEquals(antes, DatabaseTestSupport.wholeTable());
     }
 
     // ---------------------------------------------------------------- eliminar
@@ -215,30 +220,30 @@ class DataAccessObjectIntegrationTest {
     void testEliminarExistingDni() throws SQLException {
         dao.eliminar("22334455");
 
-        assertEquals(19, contarFilas());
-        assertEquals("", filas("DNI = '22334455'"));
+        assertEquals(19, DatabaseTestSupport.countRows());
+        assertEquals("", DatabaseTestSupport.rowsWhere("DNI = '22334455'"));
     }
 
     // CI28 – eliminar un DNI inexistente. Esperado (supuesto): sin excepción y la tabla intacta.
     @Test
     void testEliminarMissingDniChangesNothing() throws SQLException {
-        String antes = tablaCompleta();
+        String antes = DatabaseTestSupport.wholeTable();
         dao.eliminar("99999999");
-        assertEquals(antes, tablaCompleta());
+        assertEquals(antes, DatabaseTestSupport.wholeTable());
     }
 
     // CI29 – eliminar(""). Esperado (supuesto): AssertionError y la tabla intacta.
     @Test
     void testEliminarRejectsEmptyDni() throws SQLException {
         assertThrows(AssertionError.class, () -> dao.eliminar(""));
-        assertEquals(20, contarFilas());
+        assertEquals(20, DatabaseTestSupport.countRows());
     }
 
     // CI30 – eliminar(null). Esperado (supuesto): AssertionError y la tabla intacta.
     @Test
     void testEliminarRejectsNullDni() throws SQLException {
         assertThrows(AssertionError.class, () -> dao.eliminar(null));
-        assertEquals(20, contarFilas());
+        assertEquals(20, DatabaseTestSupport.countRows());
     }
 
     // ---------------------------------------------------------------- errores de mapeo y de SQL
@@ -247,7 +252,7 @@ class DataAccessObjectIntegrationTest {
     // cargarBD(). Esperado: 21 DTO, el último con numero 0 (SRS §3.1: numero "mayor o igual a 0").
     @Test
     void testCargarBDMapsNumeroZero() throws SQLException {
-        ejecutar("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
+        DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
                 + "VALUES ('Cero', 'Numero', '50000000', 'Calle', 0, 'Ciudad', '2230000000')");
 
         ArrayList<AsociadoDTO> dtos = assertDoesNotThrow(() -> dao.cargarBD());
@@ -261,7 +266,7 @@ class DataAccessObjectIntegrationTest {
     // un error al interactuar con la base de datos").
     @Test
     void testCargarBDWithoutTableThrowsSQLException() throws SQLException {
-        ejecutar("DROP TABLE Asociados");
+        DatabaseTestSupport.execute("DROP TABLE Asociados");
         assertThrows(SQLException.class, () -> dao.cargarBD());
     }
 }

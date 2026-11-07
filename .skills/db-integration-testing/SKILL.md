@@ -138,7 +138,7 @@ Read `references/jdbc-patterns.md`. It covers:
 - exception assertions,
 - the "server down" run.
 
-- Classes with `@Tag("integration")`, for example `BaseDeDatosIntegrationTest` (Singleton,
+- Classes with `@Tag("integration")`, for example `DatabaseIntegrationTest` (Singleton,
   schema, seed data) and `DataAccessObjectIntegrationTest` (CRUD, errors, mapping).
 - One method per case (`ci4_guardarPersisteTodasLasColumnas`) with `@DisplayName("CI4 – ...")`.
 - `@BeforeEach` restores the seed data. Every test that touches the DB has `@Timeout`, so a hung

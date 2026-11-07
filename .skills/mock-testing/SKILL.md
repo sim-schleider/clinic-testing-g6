@@ -108,7 +108,7 @@ Write the design into `docs/informe/secciones/05-mocks.md` in Spanish:
 
 Read `references/mockito5-patterns.md`.
 
-- Use `AmbulanciaMockTest` and `EstadosMockTest` in package `modelo.modeloDominio.ambulancia`,
+- Use `AmbulanciaMockTest` and `EstadosMockTest` in package `item3`,
   with `@Tag("mock")` and `@ExtendWith(MockitoExtension.class)`.
 - One method per case (`cm3_atenderDomicilioDelegaEnEstado`) with
   `@DisplayName("CM3 – ...")`. Group B can be a `@ParameterizedTest` over the 24 cells, with

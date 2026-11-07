@@ -58,14 +58,15 @@ link.
 
 ## Conventions
 
-- Test classes in `src/test/java`, same package as the class under test, name ends in `Test`,
+- Test classes in `src/test/java`, one package per assignment item (`item1`, `item2`, `item3`),
+  importing the production classes they test; name ends in `Test`,
   class-level `@Tag("unit" | "integration" | "mock" | "concurrency")`.
 - Case IDs: `CU` unit, `CI` DB integration, `CM` mocks, `CC` concurrency; `D` defects;
   `FU`/`FI`/`FM`/`FC` seeded faults. Every test method starts with its ID (`cu3_numeroCeroValido`)
   and has `@DisplayName("CU3 – ...")`; parameterized rows put the ID in the first argument and use
   `name = "{0} – ..."`. That is how results are matched back to the design tables.
-- Deliverables (tables, report text) are written in Spanish; code identifiers follow the existing
-  Spanish naming.
+- Deliverables (tables, report text) are written in Spanish. Test-code identifiers (classes,
+  helpers, variables) are in English; production code keeps its Spanish names.
 
 ## Report layout (`docs/informe/`)
 

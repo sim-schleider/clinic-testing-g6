@@ -69,7 +69,8 @@ No se siembran fallas en el código fuente ni siquiera de forma temporal.
 
 - Java 17, Maven, JUnit 5.10, Mockito 5.11, MySQL 8 (`docker-compose.yml`). Surefire corre con
   `-ea`: los inválidos esperan `AssertionError`.
-- Clases en `src/test/java`, mismo paquete que la clase bajo prueba, nombre terminado en `Test`,
+- Clases en `src/test/java`, un paquete por punto de la consigna (`item1`, `item2`, `item3`),
+  nombre terminado en `Test`,
   con `@Tag("unit" | "integration" | "mock" | "concurrency")`.
 - Cada método empieza con su ID (`cu3_...`) y lleva `@DisplayName("CU3 – ...")`.
   IDs: `CU` unitarias, `CI` integración BD, `CM` mocks, `CC` concurrencia, `D` defectos.

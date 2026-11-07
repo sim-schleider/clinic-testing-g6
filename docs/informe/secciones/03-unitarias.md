@@ -10,7 +10,7 @@ Alcance: los dos constructores, los siete setters y los siete getters. La suite 
 datos, archivos ni red. La unicidad del `dni` queda fuera: es responsabilidad de la persistencia y
 se prueba en la integración con la base de datos.
 
-Suite: `src/test/java/persistencia/AsociadoDTOTest.java` (`@Tag("unit")`).
+Suite: `src/test/java/item1/AsociadoDTOTest.java` (`@Tag("unit")`).
 
 ## Oráculo y supuestos
 
