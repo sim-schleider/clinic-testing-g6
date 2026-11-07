@@ -44,28 +44,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- Disponible
 
-    // CM13 – Disponible + SolicitudDeTraslado. Esperado: TrasladandoPacienteClinica.
+    // CM10 – Disponible + SolicitudDeTraslado. Esperado: TrasladandoPacienteClinica.
     @Test
     void testDisponibleTraslado() {
         new DisponibleState(ambulance).SolicitudDeTraslado();
         assertChangesTo(TrasladandoPacienteClinicaState.class);
     }
 
-    // CM14 – Disponible + SolicitudDeAtencionDomicilio. Esperado: AtendiendoEnDomicilio.
+    // CM11 – Disponible + SolicitudDeAtencionDomicilio. Esperado: AtendiendoEnDomicilio.
     @Test
     void testDisponibleAtencionDomicilio() {
         new DisponibleState(ambulance).SolicitudDeAtencionDomicilio();
         assertChangesTo(AtendiendoEnDomicilioState.class);
     }
 
-    // CM15 – Disponible + SolicitudMantenimiento. Esperado: EnTaller.
+    // CM12 – Disponible + SolicitudMantenimiento. Esperado: EnTaller.
     @Test
     void testDisponibleMantenimiento() {
         new DisponibleState(ambulance).SolicitudMantenimiento();
         assertChangesTo(EnTallerState.class);
     }
 
-    // CM16 – Disponible + RetornoClinica. Esperado: sin cambio de estado ("ya se encuentra en la clínica").
+    // CM13 – Disponible + RetornoClinica. Esperado: sin cambio de estado ("ya se encuentra en la clínica").
     @Test
     void testDisponibleRetornoClinica() {
         new DisponibleState(ambulance).RetornoClinica();
@@ -74,28 +74,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- AtendiendoEnDomicilio
 
-    // CM17 – AtendiendoEnDomicilio + SolicitudDeTraslado. Esperado: rechaza.
+    // CM14 – AtendiendoEnDomicilio + SolicitudDeTraslado. Esperado: rechaza.
     @Test
     void testAtendiendoTraslado() {
         new AtendiendoEnDomicilioState(ambulance).SolicitudDeTraslado();
         assertRejects();
     }
 
-    // CM18 – AtendiendoEnDomicilio + SolicitudDeAtencionDomicilio. Esperado: rechaza.
+    // CM15 – AtendiendoEnDomicilio + SolicitudDeAtencionDomicilio. Esperado: rechaza.
     @Test
     void testAtendiendoAtencionDomicilio() {
         new AtendiendoEnDomicilioState(ambulance).SolicitudDeAtencionDomicilio();
         assertRejects();
     }
 
-    // CM19 – AtendiendoEnDomicilio + SolicitudMantenimiento. Esperado: rechaza.
+    // CM16 – AtendiendoEnDomicilio + SolicitudMantenimiento. Esperado: rechaza.
     @Test
     void testAtendiendoMantenimiento() {
         new AtendiendoEnDomicilioState(ambulance).SolicitudMantenimiento();
         assertRejects();
     }
 
-    // CM20 – AtendiendoEnDomicilio + RetornoClinica. Esperado: RegresandoClinicaSinPaciente.
+    // CM17 – AtendiendoEnDomicilio + RetornoClinica. Esperado: RegresandoClinicaSinPaciente.
     @Test
     void testAtendiendoRetornoClinica() {
         new AtendiendoEnDomicilioState(ambulance).RetornoClinica();
@@ -104,28 +104,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- TrasladandoPacienteClinica
 
-    // CM21 – TrasladandoPacienteClinica + SolicitudDeTraslado. Esperado: rechaza.
+    // CM18 – TrasladandoPacienteClinica + SolicitudDeTraslado. Esperado: rechaza.
     @Test
     void testTrasladandoTraslado() {
         new TrasladandoPacienteClinicaState(ambulance).SolicitudDeTraslado();
         assertRejects();
     }
 
-    // CM22 – TrasladandoPacienteClinica + SolicitudDeAtencionDomicilio. Esperado: rechaza.
+    // CM19 – TrasladandoPacienteClinica + SolicitudDeAtencionDomicilio. Esperado: rechaza.
     @Test
     void testTrasladandoAtencionDomicilio() {
         new TrasladandoPacienteClinicaState(ambulance).SolicitudDeAtencionDomicilio();
         assertRejects();
     }
 
-    // CM23 – TrasladandoPacienteClinica + SolicitudMantenimiento. Esperado: rechaza.
+    // CM20 – TrasladandoPacienteClinica + SolicitudMantenimiento. Esperado: rechaza.
     @Test
     void testTrasladandoMantenimiento() {
         new TrasladandoPacienteClinicaState(ambulance).SolicitudMantenimiento();
         assertRejects();
     }
 
-    // CM24 – TrasladandoPacienteClinica + RetornoClinica. Esperado: Disponible (Javadoc:
+    // CM21 – TrasladandoPacienteClinica + RetornoClinica. Esperado: Disponible (Javadoc:
     // "Cambia el estado de la ambulancia a DisponibleState").
     @Test
     void testTrasladandoRetornoClinica() {
@@ -135,28 +135,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- EnTaller
 
-    // CM25 – EnTaller + SolicitudDeTraslado. Esperado: rechaza.
+    // CM22 – EnTaller + SolicitudDeTraslado. Esperado: rechaza.
     @Test
     void testEnTallerTraslado() {
         new EnTallerState(ambulance).SolicitudDeTraslado();
         assertRejects();
     }
 
-    // CM26 – EnTaller + SolicitudDeAtencionDomicilio. Esperado: rechaza.
+    // CM23 – EnTaller + SolicitudDeAtencionDomicilio. Esperado: rechaza.
     @Test
     void testEnTallerAtencionDomicilio() {
         new EnTallerState(ambulance).SolicitudDeAtencionDomicilio();
         assertRejects();
     }
 
-    // CM27 – EnTaller + SolicitudMantenimiento. Esperado: RegresandoDelTaller.
+    // CM24 – EnTaller + SolicitudMantenimiento. Esperado: RegresandoDelTaller.
     @Test
     void testEnTallerMantenimiento() {
         new EnTallerState(ambulance).SolicitudMantenimiento();
         assertChangesTo(RegresandoDelTallerState.class);
     }
 
-    // CM28 – EnTaller + RetornoClinica. Esperado (supuesto: el retorno se trata como un pedido más):
+    // CM25 – EnTaller + RetornoClinica. Esperado (supuesto: el retorno se trata como un pedido más):
     // rechaza ("no puede retornar a la clínica").
     @Test
     void testEnTallerRetornoClinica() {
@@ -166,28 +166,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- RegresandoDelTaller
 
-    // CM29 – RegresandoDelTaller + SolicitudDeTraslado. Esperado: rechaza.
+    // CM26 – RegresandoDelTaller + SolicitudDeTraslado. Esperado: rechaza.
     @Test
     void testRegresandoDelTallerTraslado() {
         new RegresandoDelTallerState(ambulance).SolicitudDeTraslado();
         assertRejects();
     }
 
-    // CM30 – RegresandoDelTaller + SolicitudDeAtencionDomicilio. Esperado: rechaza.
+    // CM27 – RegresandoDelTaller + SolicitudDeAtencionDomicilio. Esperado: rechaza.
     @Test
     void testRegresandoDelTallerAtencionDomicilio() {
         new RegresandoDelTallerState(ambulance).SolicitudDeAtencionDomicilio();
         assertRejects();
     }
 
-    // CM31 – RegresandoDelTaller + SolicitudMantenimiento. Esperado: rechaza.
+    // CM28 – RegresandoDelTaller + SolicitudMantenimiento. Esperado: rechaza.
     @Test
     void testRegresandoDelTallerMantenimiento() {
         new RegresandoDelTallerState(ambulance).SolicitudMantenimiento();
         assertRejects();
     }
 
-    // CM32 – RegresandoDelTaller + RetornoClinica. Esperado: Disponible.
+    // CM29 – RegresandoDelTaller + RetornoClinica. Esperado: Disponible.
     @Test
     void testRegresandoDelTallerRetornoClinica() {
         new RegresandoDelTallerState(ambulance).RetornoClinica();
@@ -196,28 +196,28 @@ class StatesMockTest {
 
     // ---------------------------------------------------------------- RegresandoClinicaSinPaciente
 
-    // CM33 – RegresandoClinicaSinPaciente + SolicitudDeTraslado. Esperado: TrasladandoPacienteClinica.
+    // CM30 – RegresandoClinicaSinPaciente + SolicitudDeTraslado. Esperado: TrasladandoPacienteClinica.
     @Test
     void testRegresandoSinPacienteTraslado() {
         new RegresandoClinicaSinPacienteState(ambulance).SolicitudDeTraslado();
         assertChangesTo(TrasladandoPacienteClinicaState.class);
     }
 
-    // CM34 – RegresandoClinicaSinPaciente + SolicitudDeAtencionDomicilio. Esperado: AtendiendoEnDomicilio.
+    // CM31 – RegresandoClinicaSinPaciente + SolicitudDeAtencionDomicilio. Esperado: AtendiendoEnDomicilio.
     @Test
     void testRegresandoSinPacienteAtencionDomicilio() {
         new RegresandoClinicaSinPacienteState(ambulance).SolicitudDeAtencionDomicilio();
         assertChangesTo(AtendiendoEnDomicilioState.class);
     }
 
-    // CM35 – RegresandoClinicaSinPaciente + SolicitudMantenimiento. Esperado: rechaza.
+    // CM32 – RegresandoClinicaSinPaciente + SolicitudMantenimiento. Esperado: rechaza.
     @Test
     void testRegresandoSinPacienteMantenimiento() {
         new RegresandoClinicaSinPacienteState(ambulance).SolicitudMantenimiento();
         assertRejects();
     }
 
-    // CM36 – RegresandoClinicaSinPaciente + RetornoClinica. Esperado: Disponible.
+    // CM33 – RegresandoClinicaSinPaciente + RetornoClinica. Esperado: Disponible.
     @Test
     void testRegresandoSinPacienteRetornoClinica() {
         new RegresandoClinicaSinPacienteState(ambulance).RetornoClinica();

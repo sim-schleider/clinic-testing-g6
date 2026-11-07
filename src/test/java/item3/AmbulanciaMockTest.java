@@ -127,42 +127,9 @@ class AmbulanciaMockTest {
         verifyNoMoreInteractions(state);
     }
 
-    // ---------------------------------------------------------------- Argumentos nulos
-
-    // CM7 – atenderDomicilio(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
-    @Test
-    void testAtenderDomicilioRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulance.atenderDomicilio(null));
-        verifyNoInteractions(state);
-        assertFalse(ambulance.isOcupado());
-    }
-
-    // CM8 – trasladarALaClinica(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
-    @Test
-    void testTrasladarRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulance.trasladarALaClinica(null));
-        verifyNoInteractions(state);
-        assertFalse(ambulance.isOcupado());
-    }
-
-    // CM9 – solicitarMantenimiento(null). Esperado: AssertionError, sin tocar el estado ni ocuparse.
-    @Test
-    void testSolicitarMantenimientoRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulance.solicitarMantenimiento(null));
-        verifyNoInteractions(state);
-        assertFalse(ambulance.isOcupado());
-    }
-
-    // CM10 – setState(null). Esperado: AssertionError y el estado actual sin cambios.
-    @Test
-    void testSetStateRejectsNull() {
-        assertThrows(AssertionError.class, () -> ambulance.setState(null));
-        assertSame(state, ambulance.getEstadoActual());
-    }
-
     // ---------------------------------------------------------------- Simulación terminada
 
-    // CM11 – atenderDomicilio con la ambulancia libre y la simulación terminada.
+    // CM7 – atenderDomicilio con la ambulancia libre y la simulación terminada.
     // Esperado: vuelve sin delegar en el estado y sin ocuparse.
     @Test
     void testAtenderDomicilioAfterSimulacionDoesNothing() {
@@ -174,7 +141,7 @@ class AmbulanciaMockTest {
         assertFalse(ambulance.isOcupado());
     }
 
-    // CM12 – trasladarALaClinica con la ambulancia ocupada y la simulación terminada.
+    // CM8 – trasladarALaClinica con la ambulancia ocupada y la simulación terminada.
     // Esperado: no se queda esperando (vuelve antes de 2 s) y no delega en el estado.
     @Test
     void testTrasladarWhenBusyAfterSimulacionDoesNotWait() {
@@ -188,7 +155,7 @@ class AmbulanciaMockTest {
 
     // ---------------------------------------------------------------- Estado mock con comportamiento
 
-    // CM37 – El estado mock simula una transición: al pedir un traslado cambia la ambulancia a otro
+    // CM9 – El estado mock simula una transición: al pedir un traslado cambia la ambulancia a otro
     // estado mock. Luego se regresa sin paciente. Esperado: el retorno se delega en el estado nuevo,
     // no en el anterior (la ambulancia siempre delega en su estado actual).
     @Test

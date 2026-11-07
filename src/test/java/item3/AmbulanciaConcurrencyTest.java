@@ -4,6 +4,7 @@ import item3.support.AmbulanciaWithoutNotifyAll;
 import modelo.modeloDominio.ambulancia.Ambulancia;
 import modelo.modeloDominio.ambulancia.AtendiendoEnDomicilioState;
 import modelo.modeloDominio.ambulancia.DisponibleState;
+import modelo.modeloDominio.ambulancia.RegresandoClinicaSinPacienteState;
 import modelo.modeloDominio.ambulancia.RetornoAutomatico;
 import modelo.modeloDominio.ambulancia.TrasladandoPacienteClinicaState;
 import modelo.modeloDominio.personas.asociado.Asociado;
@@ -66,14 +67,16 @@ class AmbulanciaConcurrencyTest {
     }
 
     /**
-     * Escenario de CC7 y CC13: el hilo del test ocupa la ambulancia, otro hilo pide un traslado y
-     * queda esperando, y el hilo del test la libera con regresarSinPaciente().
-     * Devuelve true si el pedido en espera se despertó y terminó dentro de 5 s.
+     * Escenario de CC6 y CC13: el hilo del test ocupa la ambulancia, otro hilo pide un traslado y
+     * queda esperando sin cambiar el estado (exclusión mutua), y el hilo del test la libera con
+     * regresarSinPaciente(). Devuelve true si el pedido en espera se despertó y terminó dentro de 5 s.
      */
     private boolean waitingRequestWakesUp(Ambulancia ambulance) throws InterruptedException {
         ambulance.atenderDomicilio(ana);
         Thread request = startThread(() -> ambulance.trasladarALaClinica(beto));
         waitUntil(() -> isWaiting(request), 2000, "el pedido de traslado queda esperando");
+        assertInstanceOf(AtendiendoEnDomicilioState.class, ambulance.getEstadoActual(),
+                "el pedido en espera cambió el estado de la ambulancia ocupada");
 
         ambulance.regresarSinPaciente();
 
@@ -81,27 +84,16 @@ class AmbulanciaConcurrencyTest {
         return !request.isAlive();
     }
 
-    // CC6 – Exclusión mutua: con la ambulancia ocupada, otro hilo pide un traslado.
-    // Esperado: ese hilo queda esperando (WAITING) y el estado no cambia.
-    @Test
-    void testBusyAmbulanceMakesOtherThreadWait() throws InterruptedException {
-        ambulance.atenderDomicilio(ana);
-
-        Thread request = startThread(() -> ambulance.trasladarALaClinica(beto));
-
-        waitUntil(() -> isWaiting(request), 2000, "el pedido de traslado queda esperando");
-        assertInstanceOf(AtendiendoEnDomicilioState.class, ambulance.getEstadoActual());
-    }
-
-    // CC7 – El pedido en espera se despierta cuando la ambulancia se libera con regresarSinPaciente().
-    // Esperado: el hilo termina y la ambulancia queda TrasladandoPacienteClinica.
+    // CC6 – Exclusión mutua: con la ambulancia ocupada, otro hilo pide un traslado. Esperado: ese hilo
+    // queda esperando (WAITING) sin cambiar el estado, se despierta cuando la ambulancia se libera con
+    // regresarSinPaciente(), y la ambulancia queda TrasladandoPacienteClinica.
     @Test
     void testWaitingRequestWakesUpOnRegresarSinPaciente() throws InterruptedException {
         assertTrue(waitingRequestWakesUp(ambulance), "el pedido en espera no se despertó");
         assertInstanceOf(TrasladandoPacienteClinicaState.class, ambulance.getEstadoActual());
     }
 
-    // CC8 – El operario ocupa la ambulancia (taller) y un asociado pide atención a domicilio.
+    // CC7 – El operario ocupa la ambulancia (taller) y un asociado pide atención a domicilio.
     // Esperado: el asociado espera y se despierta cuando la ambulancia vuelve del taller.
     @Test
     void testWaitingRequestWakesUpOnVolviendoDelTaller() throws InterruptedException {
@@ -115,7 +107,7 @@ class AmbulanciaConcurrencyTest {
         assertFalse(request.isAlive(), "el pedido en espera no se despertó");
     }
 
-    // CC9 – Dos hilos esperan la ambulancia ocupada y la simulación termina.
+    // CC8 – Dos hilos esperan la ambulancia ocupada y la simulación termina.
     // Esperado: los dos terminan sin delegar en el estado (sigue AtendiendoEnDomicilio).
     @Test
     void testEndingSimulacionReleasesAllWaitingThreads() throws InterruptedException {
@@ -132,7 +124,7 @@ class AmbulanciaConcurrencyTest {
         assertInstanceOf(AtendiendoEnDomicilioState.class, ambulance.getEstadoActual());
     }
 
-    // CC10 – RetornoAutomatico con la simulación activa y la ambulancia RegresandoClinicaSinPaciente.
+    // CC9 – RetornoAutomatico con la simulación activa y la ambulancia RegresandoClinicaSinPaciente.
     // Esperado: dentro de un intervalo (10 s, más 5 s de margen) la devuelve a Disponible (Javadoc:
     // "periódicamente intenta retornar la ambulancia a la clínica mientras la simulación esté activa").
     @Test
@@ -145,6 +137,22 @@ class AmbulanciaConcurrencyTest {
         waitUntil(() -> ambulance.getEstadoActual() instanceof DisponibleState, 15000,
                 "el retorno automático devuelve la ambulancia a Disponible");
         ambulance.setSimulacionActiva(false);
+    }
+
+    // CC10 – RetornoAutomatico con la simulación ya terminada y la ambulancia
+    // RegresandoClinicaSinPaciente. Esperado: no la devuelve a Disponible y el hilo termina dentro de
+    // un intervalo (10 s, más 5 s de margen) (Javadoc: retorna "mientras la simulación esté activa").
+    @Test
+    void testRetornoAutomaticoAfterSimulacionDoesNothing() throws InterruptedException {
+        ambulance.atenderDomicilio(ana);
+        ambulance.regresarSinPaciente();
+        ambulance.setSimulacionActiva(false);
+
+        Thread retornoAutomatico = startThread(new RetornoAutomatico(ambulance));
+
+        retornoAutomatico.join(15000);
+        assertFalse(retornoAutomatico.isAlive(), "el retorno automático siguió corriendo");
+        assertInstanceOf(RegresandoClinicaSinPacienteState.class, ambulance.getEstadoActual());
     }
 
     // CC11 – Mientras un hilo hace el retorno a la clínica desde TrasladandoPacienteClinica, otro
@@ -182,11 +190,11 @@ class AmbulanciaConcurrencyTest {
     }
 
     // CC13 – Falla sembrada FC1 (sin tocar el código): una ambulancia de prueba cuyo
-    // regresarSinPaciente() se olvida de llamar a notifyAll(). Esperado: el escenario de CC7
+    // regresarSinPaciente() se olvida de llamar a notifyAll(). Esperado: el escenario de CC6
     // detecta la falla, porque el pedido en espera ya no se despierta.
     @Test
     void testSeededMissingNotifyAllIsDetected() throws InterruptedException {
         assertFalse(waitingRequestWakesUp(new AmbulanciaWithoutNotifyAll()),
-                "el escenario de CC7 no detectó la falta de notifyAll()");
+                "el escenario de CC6 no detectó la falta de notifyAll()");
     }
 }
