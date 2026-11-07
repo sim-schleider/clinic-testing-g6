@@ -36,7 +36,7 @@ Si hay conflicto con otro documento del repo, rige este archivo.
 1. **`AsociadoDTO`**: pruebas unitarias estrictamente aisladas (sin MySQL ni otros servicios)
    de asignación, recuperación y validaciones de integridad de los setters.
    Deben detectar las fallas del código provisto.
-2. **Integración** de `AsociadoDTO` + `DataAccessObject` + `BaseDeDatos` contra MySQL real:
+2. **Integración** de `AsociadoDTO` + `DataAccessObject` + `BaseDeDatos` contra MySQL:
    Singleton de la conexión, creación automática de tablas y datos semilla, CRUD con consultas
    parametrizadas. Deben atrapar excepciones SQL, errores de mapeo e inconsistencias.
 3. **Mocks e integración/concurrencia**: `Ambulancia` con la interfaz `State` mockeada;

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pruebas de integración AsociadoDTO → DataAccessObject → BaseDeDatos → MySQL real (SRS §3.3).
+ * Pruebas de integración AsociadoDTO → DataAccessObject → BaseDeDatos → MySQL.
  * Cada escritura se verifica con SQL propio (DatabaseTestSupport), nunca leyendo con el mismo DAO.
  * Los valores límite salen del esquema que crea iniciarBD() (la SRS no fija largos): VARCHAR(30) para
  * nombre, apellido y calle, VARCHAR(35) para ciudad, VARCHAR(10) para DNI y VARCHAR(15) para telefono.
@@ -55,7 +55,7 @@ class DataAccessObjectIntegrationTest {
 
     // ---------------------------------------------------------------- guardar
 
-    // CI8 – guardar con datos válidos. Esperado: una fila nueva con cada dato en su columna (SRS §3.3).
+    // CI8 – guardar con datos válidos. Esperado: una fila nueva con cada dato en su columna.
     @Test
     void testGuardarInsertsEveryColumn() throws SQLException {
         dao.guardar(asociadoValido());
@@ -116,7 +116,7 @@ class DataAccessObjectIntegrationTest {
     }
 
     // CI16 – guardar con el DNI de la fila semilla 1. Esperado: violación de unicidad
-    // (SRS §3.1, el DNI "actúa como identificador único") y la tabla sin filas nuevas.
+    // (el DNI "actúa como identificador único") y la tabla sin filas nuevas.
     @Test
     void testGuardarRejectsDuplicateDni() throws SQLException {
         Asociado repetido = asociado("Nombre", "Apellido", "12345678", "Calle", 777, "Ciudad", "2230001111");
@@ -125,7 +125,7 @@ class DataAccessObjectIntegrationTest {
         assertEquals(20, DatabaseTestSupport.countRows());
     }
 
-    // CI17 – guardar(null). Esperado: AssertionError (SRS §3.3, "validará que no sea nula") y sin filas nuevas.
+    // CI17 – guardar(null). Esperado: AssertionError ("validará que no sea nula") y sin filas nuevas.
     @Test
     void testGuardarRejectsNull() throws SQLException {
         assertThrows(AssertionError.class, () -> dao.guardar(null));
@@ -134,7 +134,7 @@ class DataAccessObjectIntegrationTest {
 
     // ---------------------------------------------------------------- cargar, cargarConLimite, cargarBD
 
-    // CI18 – cargar(1), primera fila. Esperado: un DTO igual a la fila 1 (SRS §3.3, carga individual).
+    // CI18 – cargar(1), primera fila. Esperado: un DTO igual a la fila 1 (carga individual).
     @Test
     void testCargarFirstRow() throws SQLException {
         AsociadoDTO dto = assertDoesNotThrow(() -> dao.cargar(1));
@@ -176,7 +176,7 @@ class DataAccessObjectIntegrationTest {
         assertEquals(20, dao.cargarConLimite(21).size());
     }
 
-    // CI24 – cargarBD(). Esperado: la tabla completa, cada DTO igual a su fila (SRS §3.3, colección completa).
+    // CI24 – cargarBD(). Esperado: la tabla completa, cada DTO igual a su fila (colección completa).
     @Test
     void testCargarBDReturnsWholeTable() throws SQLException {
         StringBuilder cargado = new StringBuilder();
@@ -189,7 +189,7 @@ class DataAccessObjectIntegrationTest {
     // ---------------------------------------------------------------- actualizar
 
     // CI25 – actualizar el asociado de la fila 7 (a propósito no la 1), identificado por su DNI.
-    // Esperado: cambia la fila 7 y ninguna otra (SRS §3.3, actualiza "basándose en criterios
+    // Esperado: cambia la fila 7 y ninguna otra (actualiza "basándose en criterios
     // únicos como el número de documento (DNI)").
     @Test
     void testActualizarChangesOnlyThatDni() throws SQLException {
@@ -215,7 +215,7 @@ class DataAccessObjectIntegrationTest {
 
     // ---------------------------------------------------------------- eliminar
 
-    // CI27 – eliminar un DNI existente. Esperado: 19 filas y ese DNI ya no está (SRS §3.3).
+    // CI27 – eliminar un DNI existente. Esperado: 19 filas y ese DNI ya no está.
     @Test
     void testEliminarExistingDni() throws SQLException {
         dao.eliminar("22334455");
@@ -249,7 +249,7 @@ class DataAccessObjectIntegrationTest {
     // ---------------------------------------------------------------- errores de mapeo y de SQL
 
     // CI31 – La tabla tiene una fila con numero = 0 (insertada con SQL propio) y se llama a
-    // cargarBD(). Esperado: 21 DTO, el último con numero 0 (SRS §3.1: numero "mayor o igual a 0").
+    // cargarBD(). Esperado: 21 DTO, el último con numero 0 (numero "mayor o igual a 0").
     @Test
     void testCargarBDMapsNumeroZero() throws SQLException {
         DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "

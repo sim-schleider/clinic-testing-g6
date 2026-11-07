@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Pruebas unitarias de AsociadoDTO. Las reglas de la SRS §3.1 (String no nulos, numero >= 0) son
+ * Pruebas unitarias de AsociadoDTO. Las reglas de la SRS (String no nulos, numero >= 0) son
  * precondiciones del constructor parametrizado y de los setters: el cliente garantiza que se
  * cumplen, así que solo se prueban las clases válidas. Cada clase se cubre con un único caso; el
  * representante de numero es su valor límite 0.
