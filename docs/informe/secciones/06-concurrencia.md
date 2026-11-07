@@ -9,9 +9,9 @@ descubre problemas de sincronización y fallos de estado.
 
 Suites (`@Tag("concurrency")`, sin mocks):
 
-- `AmbulanciaMaquinaDeEstadosTest` (CC1–CC5): flujos completos en un solo hilo, con los estados
+- `AmbulanciaStateMachineTest` (CC1–CC5): flujos completos en un solo hilo, con los estados
   reales.
-- `AmbulanciaConcurrenciaTest` (CC6–CC13): hilos que compiten por la ambulancia.
+- `AmbulanciaConcurrencyTest` (CC6–CC13): hilos que compiten por la ambulancia.
 
 ## Oráculo y supuestos
 
@@ -34,10 +34,11 @@ entran dos a la vez.
 
 | Id | Supuesto | Justificación |
 |----|----------|---------------|
-| S16 | Después del retorno automático también se cumple el invariante | Si no, los hilos que esperan siguen bloqueados aunque la ambulancia esté regresando |
-| S17 | Un pedido que el estado rechaza no deja la ambulancia ocupada | Sale del invariante. Choca con el contrato literal ("se ocupa, delega"), que no prevé el rechazo |
-| S18 | Ningún hilo duerme con el lock de la ambulancia tomado | Buena práctica de concurrencia: una espera dentro de un bloque `synchronized` frena a todos los demás hilos |
-| S19 | Una simulación chica (2 asociados con 1 solicitud) termina en menos de 2 minutos | El plazo sale de las esperas al azar de `TiempoMuerto` (hasta 8 s cada una), no de la especificación |
+| S10 | Después del retorno automático también se cumple el invariante | Si no, los hilos que esperan siguen bloqueados aunque la ambulancia esté regresando |
+| S11 | Un pedido que el estado rechaza no deja la ambulancia ocupada | Sale del invariante. Choca con el contrato literal ("se ocupa, delega"), que no prevé el rechazo |
+| S12 | Ningún hilo duerme con el lock de la ambulancia tomado | Buena práctica de concurrencia: una espera dentro de un bloque `synchronized` frena a todos los demás hilos |
+| S13 | Una simulación chica (2 asociados con 1 solicitud) termina en menos de 2 minutos | El plazo sale de las esperas al azar de `TiempoMuerto` (hasta 8 s cada una), no de la especificación |
+| S14 | Con la simulación terminada, `RetornoAutomatico` termina dentro de un intervalo (10 s) | El Javadoc dice que retorna "mientras la simulación esté activa", pero no cuándo termina el hilo |
 
 ## Recursos compartidos e hilos
 
@@ -87,28 +88,34 @@ stateDiagram-v2
 | CC1 | Un hilo | Domicilio → regreso → retorno automático | AtendiendoEnDomicilio (ocupada), RegresandoClinicaSinPaciente (libre), Disponible (libre) | ✅ |
 | CC2 | Un hilo | Traslado → regreso | Trasladando (ocupada), Disponible (libre) | ❌ D10 |
 | CC3 | Un hilo | Mantenimiento → vuelta del taller → retorno automático | EnTaller (ocupada), RegresandoDelTaller (libre), Disponible (libre) | ✅ |
-| CC4 | Un hilo | Domicilio → retorno automático | RegresandoClinicaSinPaciente y libre (S16) | ❌ D11 |
-| CC5 | Un hilo | Mantenimiento → vuelta del taller → pedido de domicilio | Sigue RegresandoDelTaller y libre (S17) | ❌ D12 |
-| CC6 | El test ocupa la ambulancia; otro hilo pide un traslado | Esperar el estado del hilo | El hilo queda en `WAITING` y el estado no cambia | ✅ |
-| CC7 | Ídem | `regresarSinPaciente()` | El pedido se despierta y la ambulancia queda Trasladando | ✅ |
-| CC8 | El operario ocupa la ambulancia; un asociado espera | `volviendoDelTaller()` | El pedido se despierta | ✅ |
-| CC9 | Dos hilos esperan la ambulancia ocupada | `setSimulacionActiva(false)` | Los dos terminan sin delegar en el estado | ✅ |
-| CC10 | `RetornoAutomatico` con la simulación activa | Esperar hasta 15 s | La ambulancia vuelve a Disponible | ❌ D13 |
-| CC11 | Un hilo hace el retorno desde Trasladando; el test consulta `isOcupado()` | Consultar mientras el retorno está en curso | Responde sin esperar a que termine el retorno (S18) | ❌ D14 |
-| CC12 | 2 `Asociado`, 1 `Operario` y `RetornoAutomatico` reales | Esperar a que terminen | Todos los hilos terminan en menos de 2 minutos (S19) | ✅ |
-| CC13 | Falla sembrada FC1: ambulancia de prueba sin `notifyAll()` | El escenario de CC7 | El escenario detecta la falla: el pedido no se despierta | ✅ |
+| CC4 | Un hilo | Domicilio → retorno automático | RegresandoClinicaSinPaciente y libre (S10) | ❌ D11 |
+| CC5 | Un hilo | Mantenimiento → vuelta del taller → pedido de domicilio | Sigue RegresandoDelTaller y libre (S11) | ❌ D12 |
+| CC6 | El test ocupa la ambulancia; otro hilo pide un traslado | Esperar a que el hilo quede en `WAITING`; después `regresarSinPaciente()` | Mientras espera, el estado no cambia; al liberarse, el pedido se despierta y la ambulancia queda Trasladando | ✅ |
+| CC7 | El operario ocupa la ambulancia; un asociado espera | `volviendoDelTaller()` | El pedido se despierta | ✅ |
+| CC8 | Dos hilos esperan la ambulancia ocupada | `setSimulacionActiva(false)` | Los dos terminan sin delegar en el estado | ✅ |
+| CC9 | `RetornoAutomatico` con la simulación activa | Esperar hasta 15 s | La ambulancia vuelve a Disponible | ❌ D13 |
+| CC10 | `RetornoAutomatico` con la simulación terminada | Esperar hasta 15 s | El hilo termina sin devolver la ambulancia a Disponible (S14) | ✅ |
+| CC11 | Un hilo hace el retorno desde Trasladando; el test consulta `isOcupado()` | Consultar mientras el retorno está en curso | Responde sin esperar a que termine el retorno (S12) | ❌ D14 |
+| CC12 | 2 `Asociado`, 1 `Operario` y `RetornoAutomatico` reales | Esperar a que terminen | Todos los hilos terminan en menos de 2 minutos (S13) | ✅ |
+| CC13 | Falla sembrada FC1: ambulancia de prueba sin `notifyAll()` | El escenario de CC6 | El escenario detecta la falla: el pedido no se despierta | ✅ |
 
 ## Resultados
 
-Ejecución del 31/10/2026, sobre el código provisto con solo las correcciones de compilación D1 y D2
-aplicadas. Esas correcciones se revirtieron después por indicación de la cátedra: con el código tal
-como se entregó la suite no compila (ver los defectos D1 y D2 en el registro de defectos).
+La suite se ejecutó una vez, sobre el código provisto con solo las correcciones de compilación D1 y
+D2 aplicadas en una copia temporal (Apéndice C), mediante `run_tests.sh concurrency`:
+
+<!-- PENDIENTE: regenerar resultados/concurrency.{md,log} con run_tests.sh concurrency después de
+commitear los cambios del branch. Los valores de esta tabla salen de la corrida del 06/11. -->
 
 | Suite | Total | Pasan | Fallan |
 |-------|-------|-------|--------|
-| `AmbulanciaMaquinaDeEstadosTest` | 5 | 2 | 3 |
-| `AmbulanciaConcurrenciaTest` | 8 | 6 | 2 |
+| `AmbulanciaStateMachineTest` | 5 | 2 | 3 |
+| `AmbulanciaConcurrencyTest` | 8 | 6 | 2 |
 | Total | 13 | 8 | 5 |
+
+Pasan los casos de exclusión mutua, de despertar de los hilos en espera, de fin de simulación, del
+retorno automático con la simulación terminada y de la simulación completa. Fallan 5 casos, uno por
+cada defecto D10 a D14. La tabla completa está en el Apéndice A (`resultados/concurrency.md`).
 
 Los casos concurrentes son deterministas: un hilo solo entra en `WAITING` dentro de `wait()`, y solo
 lo despierta un `notifyAll()` del código. Por eso no hace falta repetirlos para estimar una tasa de
@@ -118,22 +125,22 @@ detección.
 
 | Id | Ubicación | Descripción | Detectado por |
 |----|-----------|-------------|---------------|
-| D10 | `TrasladandoPacienteClinicaState.RetornoClinica` | Pasa a RegresandoDelTaller en lugar de Disponible | CM24, CC2 |
+| D10 | `TrasladandoPacienteClinicaState.RetornoClinica` | Pasa a RegresandoDelTaller en lugar de Disponible | CM21, CC2 |
 | D11 | `Ambulancia.retornoAutomatico` | Cambia el estado pero no libera la ambulancia | CC4 |
 | D12 | `atenderDomicilio`, `trasladarALaClinica`, `solicitarMantenimiento` | Ocupan la ambulancia y notifican éxito aunque el estado rechace el pedido | CC5 |
-| D13 | `RetornoAutomatico.run` | La condición del `while` está invertida: con la simulación activa el hilo termina enseguida y nunca devuelve la ambulancia | CC10 |
+| D13 | `RetornoAutomatico.run` | La condición del `while` está invertida: con la simulación activa el hilo termina enseguida y nunca devuelve la ambulancia | CC9 |
 | D14 | `TrasladandoPacienteClinicaState.RetornoClinica` | `Thread.sleep(1000)` dentro de un método `synchronized`: bloquea la ambulancia a todos los hilos durante 1 s | CC11 |
 
 ## Fallas sembradas
 
 Como el código de producción no se modifica, la falla se introduce con un doble de prueba definido
-en la suite. `AmbulanciaSinNotifyAll` es una subclase de `Ambulancia` cuyo `regresarSinPaciente()` no
-llama a `notifyAll()`. CC13 corre sobre ella el mismo escenario de CC7 y comprueba que el pedido en
+en la suite. `support/AmbulanciaWithoutNotifyAll` es una subclase de `Ambulancia` cuyo `regresarSinPaciente()` no
+llama a `notifyAll()`. CC13 corre sobre ella el mismo escenario de CC6 y comprueba que el pedido en
 espera ya no se despierta: el escenario detecta la falla sembrada.
 
 | Id | Falla sembrada | Detectada por | Resultado |
 |----|----------------|---------------|-----------|
-| FC1 | Falta `notifyAll()` al liberar la ambulancia | El escenario de CC7 (en CC13) | Detectada |
+| FC1 | Falta `notifyAll()` al liberar la ambulancia | El escenario de CC6 (en CC13) | Detectada |
 
 ## Observaciones de revisión de código
 
@@ -153,8 +160,8 @@ espera ya no se despierta: el escenario detecta la falla sembrada.
   reales: el indicador de ocupación queda desactualizado después del retorno automático (D11) y
   después de un pedido rechazado (D12).
 - Solo los hilos reales mostraron D13 y D14. D13 es el más grave del ítem: el hilo de retorno
-  automático, que según el informe de diseño es "vital para la simulación", termina apenas arranca.
-- La exclusión mutua y los despertares (CC6 a CC9) funcionan bien, y la falla sembrada FC1 muestra
+  automático, que según el informe de diseño es "vital para la simulación", termina apenas arranca. Con la simulación terminada, en cambio, no devuelve la ambulancia (CC10).
+- La exclusión mutua, los despertares y el fin de la simulación (CC6 a CC8) funcionan bien, y la falla sembrada FC1 muestra
   que esos escenarios detectarían un `notifyAll()` faltante.
 - Limitaciones:
   - Que estos casos den verde no prueba la ausencia de condiciones de carrera. Por ejemplo, el
