@@ -15,10 +15,12 @@ input dimension.
 Before partitioning, classify each restriction (see "Preconditions are not tested" in
 `SKILL.md`):
 
-- **Precondition** (SRS §3.1 rules of `AsociadoDTO`, every Javadoc `pre:`): the values that
-  violate it are outside the domain. They are not an equivalence class and get no case.
+- **Precondition** (every Javadoc `pre:`, the SRS §3.1 rules in the `AsociadoDTO` constructor):
+  the values that violate it are outside the domain. They are not an equivalence class and get
+  no case.
 - **Guaranteed behaviour** (the contract says what happens, for example `@throws` or a `post:`
-  covering the input): those values form invalid classes, each with its own case.
+  covering the input, or the validations of the `AsociadoDTO` setters, which the design report
+  documents): those values form invalid classes, each with its own case.
 
 ## 3. Partition rules by data type
 

@@ -4,6 +4,7 @@ import item2.support.DatabaseTestSupport;
 import persistencia.BaseDeDatos;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * usuario de docker-compose.yml.
  */
 @Tag("integration")
+@DisplayName("BaseDeDatos con MySQL – integración (ítem 2)")
 class DatabaseIntegrationTest {
 
     private BaseDeDatos bd;
@@ -30,14 +32,16 @@ class DatabaseIntegrationTest {
 
     // CI1 – Dos llamadas a getInstancia(). Esperado: la misma instancia (Singleton).
     @Test
-    void testGetInstanciaReturnsSameInstance() {
+    @DisplayName("CI1 – getInstancia() dos veces devuelve la misma instancia")
+    void ci1_getInstanciaReturnsSameInstance() {
         assertSame(bd, BaseDeDatos.getInstancia());
     }
 
     // CI2 – Se borra el esquema y se crea el Singleton. Esperado: iniciarBD() vuelve a crear el
     // esquema Grupo_7 ("verificar o crear el esquema de base de datos objetivo").
     @Test
-    void testIniciarBDCreatesSchema() throws Exception {
+    @DisplayName("CI2 – iniciarBD() vuelve a crear el esquema Grupo_7 borrado")
+    void ci2_iniciarBDCreatesSchema() throws Exception {
         DatabaseTestSupport.execute("DROP DATABASE IF EXISTS Grupo_7");
         DatabaseTestSupport.resetDatabase();
 
@@ -48,7 +52,8 @@ class DatabaseIntegrationTest {
     // CI3 – Inicialización. Esperado: la tabla Asociados tiene una columna por cada atributo del
     // asociado más el id. Se comparan en orden alfabético: el orden no está especificado.
     @Test
-    void testIniciarBDCreatesTableWithColumns() throws SQLException {
+    @DisplayName("CI3 – iniciarBD() crea la tabla con el id y los siete atributos")
+    void ci3_iniciarBDCreatesTableWithColumns() throws SQLException {
         String columnas = DatabaseTestSupport.queryValue(
                 "SELECT GROUP_CONCAT(LOWER(column_name) ORDER BY column_name SEPARATOR ' ') "
                 + "FROM information_schema.columns WHERE table_schema = 'Grupo_7' AND table_name = 'Asociados'");
@@ -60,7 +65,8 @@ class DatabaseIntegrationTest {
     // (la cantidad la fija el script de iniciarBD, no la SRS), todas cumpliendo las reglas del
     // asociado: campos no nulos, numero >= 0 y DNI distintos.
     @Test
-    void testIniciarBDLoadsValidSeedData() throws SQLException {
+    @DisplayName("CI4 – Los 20 datos semilla cumplen las reglas de la SRS")
+    void ci4_iniciarBDLoadsValidSeedData() throws SQLException {
         assertEquals(20, DatabaseTestSupport.countRows(), "cantidad de datos semilla");
         assertEquals("", DatabaseTestSupport.rowsWhere(
                 "nombre IS NULL OR apellido IS NULL OR DNI IS NULL OR calle IS NULL "
@@ -72,7 +78,8 @@ class DatabaseIntegrationTest {
     // CI5 – iniciarBD() con una fila extra en la tabla. Esperado: la tabla se recrea y vuelve a
     // tener solo los datos semilla ("eliminar y recrear la tabla Asociados").
     @Test
-    void testIniciarBDRecreatesTable() throws SQLException {
+    @DisplayName("CI5 – iniciarBD() recrea la tabla y descarta una fila extra")
+    void ci5_iniciarBDRecreatesTable() throws SQLException {
         DatabaseTestSupport.execute("INSERT INTO Asociados (nombre, apellido, DNI, calle, numero, ciudad, telefono) "
                 + "VALUES ('Lucas', 'Paniagua', '99999999', 'Calle', 1, 'Ciudad', '1')");
         assertEquals(21, DatabaseTestSupport.countRows(), "preparación: la fila extra debía insertarse");
@@ -86,7 +93,8 @@ class DatabaseIntegrationTest {
     // CI6 – cerrarConexion() y luego getInstancia(). Esperado (supuesto): el Singleton sigue
     // entregando un manejador de conexión activo ("un único manejador de conexión activo").
     @Test
-    void testGetInstanciaAfterCerrarConexionGivesActiveConnection() throws SQLException {
+    @DisplayName("CI6 – Después de cerrarConexion(), getInstancia() entrega una conexión activa")
+    void ci6_getInstanciaAfterCerrarConexionGivesActiveConnection() throws SQLException {
         bd.cerrarConexion();
         assertTrue(bd.getConexion().isClosed(), "preparación: la conexión debía quedar cerrada");
 

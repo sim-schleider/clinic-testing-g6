@@ -65,12 +65,21 @@ class AsociadoDTOTest {
 
 ## Inputs outside the domain
 
-Inputs that violate a precondition (for `AsociadoDTO`: `null` strings, negative `numero`) get
-**no test**. Do not write `assertThrows(AssertionError.class, () -> dto.setNombre(null))`: the
-contract promises nothing for that call.
+Inputs that violate a precondition (for `AsociadoDTO`: `null` strings or a negative `numero` in
+the **constructor**) get **no test**: the contract promises nothing for that call.
 
-Only when the contract guarantees a rejection (`@throws`, or a `post:` covering the input) is
-there a test for it. Then also check that the object did not change, because a validation that
+When the contract guarantees a rejection (`@throws`, a `post:` covering the input, or the
+validations of the `AsociadoDTO` setters) there is a test for it:
+
+```java
+@Test
+@DisplayName("CU9 – setNombre(null) se rechaza sin modificar el DTO")
+void cu9_setNombreRejectsNull() {
+    assertRechaza(() -> dto.setNombre(null));   // AssertionError + the seven getters unchanged
+}
+```
+
+Always check that the object did not change, because a validation that
 throws only after assigning still corrupts the object:
 
 ```java
@@ -116,7 +125,8 @@ void numeroValido(String id, int numero) {
 }
 ```
 
-There is no "se rechaza" counterpart for `numero < 0`: it is outside the domain.
+For `setNumero` the "se rechaza" counterpart is −1 (CU15). For the constructor there is none:
+a negative `numero` is outside its domain.
 
 `null` in a `@CsvSource` needs `nullValues = "null"`. `@NullAndEmptySource` supplies `null` and
 `""` for a single-argument String test, but a test can't carry a different ID per row that way.

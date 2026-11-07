@@ -43,7 +43,8 @@ el pedido vuelve sin delegar.
 
 **Precondiciones.** Ni el Javadoc ni el informe de diseño dicen qué pasa si un pedido recibe un
 argumento nulo, así que ese comportamiento no está especificado y no se prueba: el mismo criterio
-que en los ítems 1 y 2, donde las entradas fuera del dominio no tienen un resultado esperado.
+que en el constructor de `AsociadoDTO` (ítem 1) y en el DAO (ítem 2), donde las entradas fuera del
+dominio no tienen un resultado esperado.
 
 **Supuestos:**
 

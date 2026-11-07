@@ -12,6 +12,7 @@ import modelo.modeloDominio.personas.operario.Operario;
 import modelo.modeloDominio.util.Domicilio;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * son daemon, así un hilo bloqueado por un defecto no cuelga la ejecución.
  */
 @Tag("concurrency")
+@DisplayName("Concurrencia de la Ambulancia (ítem 3)")
 class AmbulanciaConcurrencyTest {
 
     private Ambulancia ambulance;
@@ -89,7 +91,8 @@ class AmbulanciaConcurrencyTest {
     // queda esperando (WAITING) sin cambiar el estado, se despierta cuando la ambulancia se libera con
     // regresarSinPaciente(), y la ambulancia queda TrasladandoPacienteClinica.
     @Test
-    void testWaitingRequestWakesUpOnRegresarSinPaciente() throws InterruptedException {
+    @DisplayName("CC6 – Un pedido en espera se despierta con regresarSinPaciente")
+    void cc6_waitingRequestWakesUpOnRegresarSinPaciente() throws InterruptedException {
         assertTrue(waitingRequestWakesUp(ambulance), "el pedido en espera no se despertó");
         assertInstanceOf(TrasladandoPacienteClinicaState.class, ambulance.getEstadoActual());
     }
@@ -97,7 +100,8 @@ class AmbulanciaConcurrencyTest {
     // CC7 – El operario ocupa la ambulancia (taller) y un asociado pide atención a domicilio.
     // Esperado: el asociado espera y se despierta cuando la ambulancia vuelve del taller.
     @Test
-    void testWaitingRequestWakesUpOnVolviendoDelTaller() throws InterruptedException {
+    @DisplayName("CC7 – Un pedido en espera se despierta con volviendoDelTaller")
+    void cc7_waitingRequestWakesUpOnVolviendoDelTaller() throws InterruptedException {
         ambulance.solicitarMantenimiento(operator);
         Thread request = startThread(() -> ambulance.atenderDomicilio(lucas));
         waitUntil(() -> isWaiting(request), 2000, "el pedido de atención queda esperando");
@@ -111,7 +115,8 @@ class AmbulanciaConcurrencyTest {
     // CC8 – Dos hilos esperan la ambulancia ocupada y la simulación termina.
     // Esperado: los dos terminan sin delegar en el estado (sigue AtendiendoEnDomicilio).
     @Test
-    void testEndingSimulacionReleasesAllWaitingThreads() throws InterruptedException {
+    @DisplayName("CC8 – Terminar la simulación libera a todos los hilos en espera")
+    void cc8_endingSimulacionReleasesAllWaitingThreads() throws InterruptedException {
         ambulance.atenderDomicilio(lucas);
         Thread transfer = startThread(() -> ambulance.trasladarALaClinica(simon));
         Thread maintenance = startThread(() -> ambulance.solicitarMantenimiento(operator));
@@ -129,7 +134,8 @@ class AmbulanciaConcurrencyTest {
     // Esperado: dentro de un intervalo (10 s, más 5 s de margen) la devuelve a Disponible (Javadoc:
     // "periódicamente intenta retornar la ambulancia a la clínica mientras la simulación esté activa").
     @Test
-    void testRetornoAutomaticoReturnsAmbulance() throws InterruptedException {
+    @DisplayName("CC9 – RetornoAutomatico devuelve la ambulancia a Disponible")
+    void cc9_retornoAutomaticoReturnsAmbulance() throws InterruptedException {
         ambulance.atenderDomicilio(lucas);
         ambulance.regresarSinPaciente();
 
@@ -144,7 +150,8 @@ class AmbulanciaConcurrencyTest {
     // RegresandoClinicaSinPaciente. Esperado: no la devuelve a Disponible y el hilo termina dentro de
     // un intervalo (10 s, más 5 s de margen) (Javadoc: retorna "mientras la simulación esté activa").
     @Test
-    void testRetornoAutomaticoAfterSimulacionDoesNothing() throws InterruptedException {
+    @DisplayName("CC10 – Con la simulación terminada, RetornoAutomatico termina sin retornar")
+    void cc10_retornoAutomaticoAfterSimulacionDoesNothing() throws InterruptedException {
         ambulance.atenderDomicilio(lucas);
         ambulance.regresarSinPaciente();
         ambulance.setSimulacionActiva(false);
@@ -161,7 +168,8 @@ class AmbulanciaConcurrencyTest {
     // con el lock de la ambulancia tomado, así que la consulta responde mientras el retorno todavía
     // está en curso (su hilo sigue en TIMED_WAITING).
     @Test
-    void testSlowTransitionDoesNotBlockQueries() throws InterruptedException {
+    @DisplayName("CC11 – Una transición lenta no bloquea las consultas de otros hilos")
+    void cc11_slowTransitionDoesNotBlockQueries() throws InterruptedException {
         ambulance.trasladarALaClinica(lucas);
         Thread returnThread = startThread(ambulance::regresarSinPaciente);
         waitUntil(() -> returnThread.getState() == Thread.State.TIMED_WAITING, 2000, "el retorno está en curso");
@@ -176,7 +184,8 @@ class AmbulanciaConcurrencyTest {
     // solicitud cada uno, 1 operario y RetornoAutomatico. Esperado: termina sola, sin bloqueos.
     // El plazo de 2 minutos sale de las esperas al azar de TiempoMuerto (hasta 8 s cada una).
     @Test
-    void testSmallSimulacionFinishes() throws InterruptedException {
+    @DisplayName("CC12 – Una simulación chica con los hilos reales termina sin bloqueos")
+    void cc12_smallSimulacionFinishes() throws InterruptedException {
         Thread[] threads = {
                 startThread(new Asociado("Lucas", "Paniagua", "30111222", "2230001111", address, 1, ambulance)),
                 startThread(new Asociado("Simon", "Schleider", "30333444", "2230003333", address, 1, ambulance)),
@@ -194,7 +203,8 @@ class AmbulanciaConcurrencyTest {
     // regresarSinPaciente() se olvida de llamar a notifyAll(). Esperado: el escenario de CC6
     // detecta la falla, porque el pedido en espera ya no se despierta.
     @Test
-    void testSeededMissingNotifyAllIsDetected() throws InterruptedException {
+    @DisplayName("CC13 – El escenario de CC6 detecta la falla sembrada FC1 (falta notifyAll)")
+    void cc13_seededMissingNotifyAllIsDetected() throws InterruptedException {
         assertFalse(waitingRequestWakesUp(new AmbulanciaWithoutNotifyAll()),
                 "el escenario de CC6 no detectó la falta de notifyAll()");
     }
