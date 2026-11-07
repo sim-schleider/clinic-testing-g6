@@ -14,7 +14,7 @@ Suites (`@Tag("integration")`, paquete `item2`):
 
 - `DatabaseIntegrationTest`: Singleton, esquema, tabla y datos semilla (CI1–CI6).
 - `DataAccessObjectIntegrationTest`: CRUD, consultas parametrizadas, errores de SQL y de mapeo
-  (CI7–CI22).
+  (CI7–CI23).
 - `support/DatabaseTestSupport`: utilidades de la suite (conexión propia y reinicio del
   Singleton). No contiene casos.
 
@@ -46,15 +46,16 @@ el CRUD se prueba a través del DAO. Los métodos `ejecutarInsert`, `ejecutarCon
 `ejecutarActualizacion` y `ejecutarDelete` de `BaseDeDatos` se ejercitan igual, porque el DAO los
 llama.
 
-**Precondiciones.** Con el mismo criterio que el constructor de `AsociadoDTO` en el ítem 1, los
-`pre:` del Javadoc son precondiciones, y las entradas que las violan no se prueban. A diferencia de
-los setters del DTO, cuyas validaciones la consigna del ítem 1 pide comprobar, la consigna del ítem 2
-pide verificar la comunicación con el motor, no las validaciones del DAO, que el informe de diseño
-describe como "validaciones defensivas" previas a contactar la base. Quedan fuera: `guardar(null)`
-y `actualizar(null)` (`pre: asociado no debe ser nulo`), `cargar(0)` (`pre: id > 0`),
-`cargarConLimite(0)` (`pre: limite > 0`) y un DNI vacío o nulo en `eliminar` (el DNI "no puede ser
-nulo", SRS §3.1). La SRS dice que el guardado "validará que no sea nula" la entidad, pero el
-Javadoc lo declara como precondición; se sigue el criterio de la cátedra y no se prueba.
+**Validación del guardado.** La SRS §3.3 define como comportamiento del DAO que el guardado
+"validará que no sea nula" la entidad. Con el mismo criterio que los setters de `AsociadoDTO` en el
+ítem 1, una validación que la especificación le asigna al componente se prueba con su entrada
+inválida: `guardar(null)` debe rechazarse sin llegar a la base (CI23).
+
+**Precondiciones.** Con el mismo criterio que el constructor de `AsociadoDTO`, las restricciones
+que solo figuran como `pre:` en el Javadoc son precondiciones, y las entradas que las violan no se
+prueban: `actualizar(null)` (`pre: asociado no debe ser nulo`), `cargar(0)` (`pre: id > 0`),
+`cargarConLimite(0)` (`pre: limite > 0`) y un DNI vacío o nulo en `eliminar`. Ninguna de ellas
+aparece en la SRS como una validación del DAO.
 
 **Supuestos** (lo que la especificación no dice):
 
@@ -64,6 +65,7 @@ Javadoc lo declara como precondición; se sigue el criterio de la cátedra y no 
 | S5 | `actualizar` y `eliminar` con un DNI inexistente no lanzan excepción y no cambian ninguna fila | Comportamiento habitual de un `UPDATE`/`DELETE` sin coincidencias |
 | S6 | Después de `cerrarConexion()`, `getInstancia()` entrega una conexión usable | SRS §3.2: "un único manejador de conexión **activo**" |
 | S7 | Las cargas devuelven las filas en el orden del id | La SRS no define un orden; InnoDB devuelve por clave primaria |
+| S16 | La validación de `guardar` se manifiesta como `AssertionError` y no inserta ninguna fila | La SRS no dice cómo se rechaza la entidad nula; el informe de diseño dice que el DAO valida con `assert` "para asegurar que no se intenten persistir objetos nulos […] antes de siquiera contactar a la base de datos" |
 
 ## Estrategia de integración
 
@@ -117,6 +119,7 @@ sequenceDiagram
 | Singleton | recién creado / conexión cerrada | `@BeforeEach` / `cerrarConexion()` |
 | Fila buscada | existe / no existe | id o DNI de la semilla / uno ausente |
 | DNI | nuevo / repetido / con SQL inyectado | `"40111222"` / `"12345678"` / `"' OR '1'='1"` |
+| Asociado a guardar | válido / nulo | `asociadoValido()` / `null` (CI23) |
 
 Parámetros del DAO: `id` ∈ {1 (primera fila), 20 (última), 21 (inexistente)}; `limite` ∈ {1, 20
 (igual a la cantidad de filas), 21 (mayor)}.
@@ -133,6 +136,7 @@ Parámetros del DAO: `id` ∈ {1 (primera fila), 20 (última), 21 (inexistente)}
 | CI6 | `cerrarConexion()` y luego `getInstancia()` | Conexión activa (S6) | ❌ D4 |
 | CI7 | `guardar` con datos válidos | Fila nueva con cada dato en su columna | ✅ |
 | CI8 | `guardar` con el DNI de la fila 1 | `SQLIntegrityConstraintViolationException` y 20 filas | ✅ |
+| CI23 | `guardar(null)` | `AssertionError` (S16) y la tabla intacta | Pendiente de ejecución |
 | CI9 | `cargar(1)` | DTO igual a la fila 1 | ❌ D5 |
 | CI10 | `cargar(20)` | DTO igual a la fila 20 | ❌ D5 |
 | CI11 | `cargar(21)` | `null` (S4) | ❌ D5 |
@@ -154,7 +158,8 @@ La suite se ejecutó una vez contra MySQL 8.0.40, sobre el código del ítem 2: 
 con el defecto D3 de `AsociadoDTO` corregido (`6cda0de`), como pide la consigna.
 
 <!-- PENDIENTE: regenerar resultados/integration.{md,log} con run_tests.sh integration después de
-commitear los cambios del branch. Los valores de esta tabla salen de la corrida del 06/11. -->
+commitear los cambios del branch. Los valores de esta tabla salen de la corrida del 06/11, anterior
+a CI23: actualizar el total (23) y el resultado de CI23. -->
 
 | Total | Pasan | Fallan |
 |-------|-------|--------|
@@ -182,6 +187,7 @@ inconsistencias del código provisto:
 | Categoría | Evidencia | Casos |
 |-----------|-----------|-------|
 | Excepciones de SQL | La violación de unicidad del DNI y la tabla inexistente llegan a quien llama al DAO como `SQLException` | CI8, CI22 (pasan) |
+| Validación de entrada | Una entidad nula se rechaza antes de ejecutar SQL y la tabla no cambia | CI23 |
 | Errores de mapeo | D5: `cargar` lee el `ResultSet` sin `next()` y falla al convertir la fila en DTO | CI9–CI11 (fallan) |
 | Errores de mapeo | Cada DTO cargado coincide campo por campo con su fila, incluida una con `numero = 0` | CI15, CI21 (pasan) |
 | Inconsistencias | D6: `actualizar` siempre modifica la fila 1, no la del DNI | CI16, CI17 (fallan) |
@@ -233,7 +239,7 @@ y la conexión cerrada (CI6).
 
 ## Conclusiones
 
-- La suite cubre el Singleton, la inicialización y las cuatro operaciones CRUD con 22 casos, y
+- La suite cubre el Singleton, la inicialización y las cuatro operaciones CRUD con 23 casos, y
   detectó tres defectos nuevos (D4, D5 y D6) que la prueba unitaria no podía ver: todos dependen del
   SQL, del esquema o del ciclo de vida de la conexión.
 - La verificación con SQL propio fue determinante en D6: con un DNI nuevo, `actualizar` no lanza
