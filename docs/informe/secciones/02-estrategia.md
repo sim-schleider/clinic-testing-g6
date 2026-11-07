@@ -57,5 +57,7 @@ las ejecuciones.
 | D*n* | Defecto detectado |
 | FU*n* / FI*n* / FM*n* / FC*n* | Falla sembrada en cada suite |
 
-Cada test lleva el identificador de su caso en el nombre, lo que permite cruzar las tablas de diseño
-con los resultados de ejecución del Apéndice A.
+Cada test lleva el identificador de su caso al principio del nombre del método (por ejemplo,
+`cu4_setNumeroAcceptsZero`) y en su `@DisplayName` (`CU4 – setNumero(0) acepta el valor límite 0`),
+así que el identificador aparece en los reportes de ejecución y en las capturas del IDE. Eso permite
+cruzar las tablas de diseño con los resultados del Apéndice A y con las capturas del Apéndice B.

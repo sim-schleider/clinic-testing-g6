@@ -9,6 +9,7 @@ import modelo.modeloDominio.personas.operario.Operario;
 import modelo.modeloDominio.util.Domicilio;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.*;
  * Los resultados esperados salen del diagrama UML, el Javadoc de Ambulancia y el informe de diseño.
  */
 @Tag("mock")
+@DisplayName("Ambulancia con State mockeado (ítem 3)")
 class AmbulanciaMockTest {
 
     private Ambulancia ambulance;
@@ -55,7 +57,8 @@ class AmbulanciaMockTest {
     // CM1 – atenderDomicilio con la ambulancia libre. Esperado: delega una vez
     // SolicitudDeAtencionDomicilio y nada más, queda ocupada y notifica.
     @Test
-    void testAtenderDomicilioDelegatesToState() {
+    @DisplayName("CM1 – atenderDomicilio delega en el estado, ocupa y notifica")
+    void cm1_atenderDomicilioDelegatesToState() {
         ambulance.atenderDomicilio(associate);
 
         verify(state).SolicitudDeAtencionDomicilio();
@@ -67,7 +70,8 @@ class AmbulanciaMockTest {
     // CM2 – trasladarALaClinica con la ambulancia libre. Esperado: delega una vez
     // SolicitudDeTraslado y nada más, queda ocupada y notifica.
     @Test
-    void testTrasladarDelegatesToState() {
+    @DisplayName("CM2 – trasladarALaClinica delega en el estado, ocupa y notifica")
+    void cm2_trasladarDelegatesToState() {
         ambulance.trasladarALaClinica(associate);
 
         verify(state).SolicitudDeTraslado();
@@ -79,7 +83,8 @@ class AmbulanciaMockTest {
     // CM3 – solicitarMantenimiento con la ambulancia libre. Esperado: delega una vez
     // SolicitudMantenimiento y nada más, queda ocupada y notifica.
     @Test
-    void testSolicitarMantenimientoDelegatesToState() {
+    @DisplayName("CM3 – solicitarMantenimiento delega en el estado, ocupa y notifica")
+    void cm3_solicitarMantenimientoDelegatesToState() {
         ambulance.solicitarMantenimiento(operator);
 
         verify(state).SolicitudMantenimiento();
@@ -93,7 +98,8 @@ class AmbulanciaMockTest {
     // CM4 – regresarSinPaciente con la ambulancia ocupada. Esperado: delega una vez
     // RetornoClinica, queda libre y notifica.
     @Test
-    void testRegresarSinPacienteDelegatesAndReleases() {
+    @DisplayName("CM4 – regresarSinPaciente delega en el estado, libera y notifica")
+    void cm4_regresarSinPacienteDelegatesAndReleases() {
         ambulance.setOcupado(true);
 
         ambulance.regresarSinPaciente();
@@ -107,7 +113,8 @@ class AmbulanciaMockTest {
     // CM5 – volviendoDelTaller con la ambulancia ocupada. Esperado: delega una vez
     // SolicitudMantenimiento (EnTaller → RegresandoDelTaller), queda libre y notifica.
     @Test
-    void testVolviendoDelTallerDelegatesAndReleases() {
+    @DisplayName("CM5 – volviendoDelTaller delega en el estado, libera y notifica")
+    void cm5_volviendoDelTallerDelegatesAndReleases() {
         ambulance.setOcupado(true);
 
         ambulance.volviendoDelTaller();
@@ -120,7 +127,8 @@ class AmbulanciaMockTest {
 
     // CM6 – retornoAutomatico. Esperado: delega una vez RetornoClinica.
     @Test
-    void testRetornoAutomaticoDelegatesToState() {
+    @DisplayName("CM6 – retornoAutomatico delega RetornoClinica en el estado")
+    void cm6_retornoAutomaticoDelegatesToState() {
         ambulance.retornoAutomatico(new RetornoAutomatico(ambulance));
 
         verify(state).RetornoClinica();
@@ -132,7 +140,8 @@ class AmbulanciaMockTest {
     // CM7 – atenderDomicilio con la ambulancia libre y la simulación terminada.
     // Esperado: vuelve sin delegar en el estado y sin ocuparse.
     @Test
-    void testAtenderDomicilioAfterSimulacionDoesNothing() {
+    @DisplayName("CM7 – Con la simulación terminada, atenderDomicilio no delega")
+    void cm7_atenderDomicilioAfterSimulacionDoesNothing() {
         ambulance.setSimulacionActiva(false);
 
         ambulance.atenderDomicilio(associate);
@@ -144,7 +153,8 @@ class AmbulanciaMockTest {
     // CM8 – trasladarALaClinica con la ambulancia ocupada y la simulación terminada.
     // Esperado: no se queda esperando (vuelve antes de 2 s) y no delega en el estado.
     @Test
-    void testTrasladarWhenBusyAfterSimulacionDoesNotWait() {
+    @DisplayName("CM8 – Ocupada y con la simulación terminada, trasladarALaClinica no espera")
+    void cm8_trasladarWhenBusyAfterSimulacionDoesNotWait() {
         ambulance.setOcupado(true);
         ambulance.setSimulacionActiva(false);
 
@@ -159,7 +169,8 @@ class AmbulanciaMockTest {
     // estado mock. Luego se regresa sin paciente. Esperado: el retorno se delega en el estado nuevo,
     // no en el anterior (la ambulancia siempre delega en su estado actual).
     @Test
-    void testDelegatesToStateSetByPreviousTransition() {
+    @DisplayName("CM9 – La ambulancia delega en el estado que dejó la transición anterior")
+    void cm9_delegatesToStateSetByPreviousTransition() {
         State otherState = mock(State.class);
         doAnswer(invocation -> {
             ambulance.setState(otherState);

@@ -14,6 +14,7 @@ import modelo.modeloDominio.personas.operario.Operario;
 import modelo.modeloDominio.util.Domicilio;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * informe de diseño.
  */
 @Tag("concurrency")
+@DisplayName("Máquina de estados real de la Ambulancia (ítem 3)")
 class AmbulanciaStateMachineTest {
 
     private Ambulancia ambulance;
@@ -57,7 +59,8 @@ class AmbulanciaStateMachineTest {
     // CC1 – Flujo de atención a domicilio: Disponible → AtendiendoEnDomicilio →
     // RegresandoClinicaSinPaciente → Disponible. Esperado: cada estado con su ocupación.
     @Test
-    void testAtencionDomicilioFlow() {
+    @DisplayName("CC1 – Flujo de atención a domicilio hasta volver a Disponible")
+    void cc1_atencionDomicilioFlow() {
         assertState(DisponibleState.class);
         ambulance.atenderDomicilio(associate);
         assertState(AtendiendoEnDomicilioState.class);
@@ -70,7 +73,8 @@ class AmbulanciaStateMachineTest {
     // CC2 – Flujo de traslado: Disponible → TrasladandoPacienteClinica → Disponible.
     // Esperado: al retornar a la clínica queda Disponible y libre (Javadoc y UML).
     @Test
-    void testTrasladoFlow() {
+    @DisplayName("CC2 – Flujo de traslado hasta volver a Disponible")
+    void cc2_trasladoFlow() {
         ambulance.trasladarALaClinica(associate);
         assertState(TrasladandoPacienteClinicaState.class);
         ambulance.regresarSinPaciente();
@@ -80,7 +84,8 @@ class AmbulanciaStateMachineTest {
     // CC3 – Flujo de mantenimiento: Disponible → EnTaller → RegresandoDelTaller → Disponible.
     // Esperado: cada estado con su ocupación.
     @Test
-    void testMantenimientoFlow() {
+    @DisplayName("CC3 – Flujo de mantenimiento hasta volver a Disponible")
+    void cc3_mantenimientoFlow() {
         ambulance.solicitarMantenimiento(operator);
         assertState(EnTallerState.class);
         ambulance.volviendoDelTaller();
@@ -93,7 +98,8 @@ class AmbulanciaStateMachineTest {
     // RegresandoClinicaSinPaciente y, por el invariante, queda libre (supuesto: si no, los hilos
     // que esperan la ambulancia siguen bloqueados).
     @Test
-    void testRetornoAutomaticoKeepsOccupancyInvariant() {
+    @DisplayName("CC4 – El retorno automático desde AtendiendoEnDomicilio libera la ambulancia")
+    void cc4_retornoAutomaticoKeepsOccupancyInvariant() {
         ambulance.atenderDomicilio(associate);
         ambulance.retornoAutomatico(new RetornoAutomatico(ambulance));
         assertState(RegresandoClinicaSinPacienteState.class);
@@ -102,7 +108,8 @@ class AmbulanciaStateMachineTest {
     // CC5 – Pedido de atención a domicilio mientras la ambulancia regresa del taller (estado que
     // rechaza el pedido). Esperado (supuesto): el estado no cambia y la ambulancia no queda ocupada.
     @Test
-    void testRejectedRequestDoesNotOccupy() {
+    @DisplayName("CC5 – Un pedido rechazado no deja la ambulancia ocupada")
+    void cc5_rejectedRequestDoesNotOccupy() {
         ambulance.solicitarMantenimiento(operator);
         ambulance.volviendoDelTaller();
 
