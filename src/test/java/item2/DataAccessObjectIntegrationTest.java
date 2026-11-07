@@ -70,6 +70,19 @@ class DataAccessObjectIntegrationTest {
         assertEquals(20, DatabaseTestSupport.countRows());
     }
 
+    // CI23 – guardar(null). Esperado: la entidad nula se rechaza ("El sistema aceptará una entidad de
+    // asociado, validará que no sea nula…") con AssertionError (S16), sin llegar a la base: la tabla
+    // queda intacta.
+    @Test
+    @DisplayName("CI23 – guardar(null) se rechaza sin modificar la tabla")
+    void ci23_guardarRejectsNull() throws SQLException {
+        String antes = DatabaseTestSupport.wholeTable();
+
+        assertThrows(AssertionError.class, () -> dao.guardar(null));
+
+        assertEquals(antes, DatabaseTestSupport.wholeTable());
+    }
+
     // ---------------------------------------------------------------- cargar, cargarConLimite, cargarBD
 
     // CI9 – cargar(1), primera fila. Esperado: un DTO igual a la fila 1 (carga individual).
