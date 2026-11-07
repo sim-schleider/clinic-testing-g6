@@ -20,8 +20,8 @@ Si hay conflicto con otro documento del repo, rige este archivo.
   - archivos de soporte del entorno de pruebas (`docker-compose.yml`, scripts de
     `.skills/`), sin afectar el comportamiento de la aplicación.
 - Fuera de esa excepción, un defecto del código **no se corrige**: se **registra** en `docs/informe/secciones/07-defectos.md`
-  con estado `No se corrige: fuera de alcance (solo testing)` y se deja el test en rojo.
-  Ese rojo es la evidencia que pide la consigna.
+  con estado `No se corrige: fuera de alcance (solo testing)` y su test queda fallando.
+  Ese test en rojo es la evidencia de detección que pide la consigna.
 
 ## 2. El oráculo es la especificación
 
@@ -49,7 +49,9 @@ El diseño de casos usa **clases de equivalencia** y **valores límite**.
 ## 4. Entregables
 
 - Código fuente completo de las suites de pruebas.
-- Capturas de ejecución en **verde** (funcionamiento correcto) y en **rojo** (detección de errores).
+- Capturas de ejecución que muestren las pruebas en **verde** (funcionamiento correcto) y en
+  **rojo** (detección de errores). Cada suite se ejecuta una vez, sobre el código del repositorio,
+  y su captura muestra los tests que pasan y los que fallan.
 - Informe con: diseño formal de escenarios, casos de prueba (clases de equivalencia y valores
   límite), resultados y conclusiones. Los resultados van en el apéndice.
 - Entregables escritos en español.
@@ -58,7 +60,7 @@ El diseño de casos usa **clases de equivalencia** y **valores límite**.
 
 Como no se edita `src/main/`, la suite debe demostrar que atrapa fallas por dos vías:
 
-- **Defectos reales** del código provisto: quedan en rojo y se registran.
+- **Defectos reales** del código provisto: su test falla y el defecto se registra.
 - **Dobles de prueba y entornos controlados** (mocks, bases de datos en estados forzados,
   subclases o stubs definidos **dentro de `src/test/`**) para simular fallas de SQL, de mapeo,
   de sincronización o de estado.
@@ -76,7 +78,7 @@ No se siembran fallas en el código fuente ni siquiera de forma temporal.
   IDs: `CU` unitarias, `CI` integración BD, `CM` mocks, `CC` concurrencia, `D` defectos.
 - Se adapta el entorno al código, nunca al revés (conexión fija en `BaseDeDatos`:
   `localhost:3306`, `progra_c`/`progra_c`, base `Grupo_7`).
-- Ejecución: `.skills/test-report/scripts/run_tests.sh <suite> <fase>`.
+- Ejecución: `.skills/test-report/scripts/run_tests.sh <suite>` (una corrida por suite).
 
 ## 7. Git
 

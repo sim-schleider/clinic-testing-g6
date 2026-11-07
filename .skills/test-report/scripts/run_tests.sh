@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Runs one test suite and, for evidence runs, saves the log and the results table.
+# Runs one test suite and saves the log and the results table: which tests pass and which fail.
 # Screenshots are never generated: the team takes them from the IDE (see SKILL.md, step 2).
 #
 # Usage (from the project root):
-#   run_tests.sh <suite> <fase> [--no-run] [-- <extra mvn args>]
+#   run_tests.sh <suite> [--dev] [--no-run] [-- <extra mvn args>]
 #
-#   suite   unit | integration | mock | concurrency | all   (JUnit 5 @Tag; "all" runs everything)
-#   fase    rojo | verde   evidence run: writes docs/informe/resultados/<suite>-<fase>.{log,md}
-#           dev            iteration run: prints the results table, saves nothing
+#   suite     unit | integration | mock | concurrency | all   (JUnit 5 @Tag; "all" runs everything)
+#             writes docs/informe/resultados/<suite>.{log,md}
+#   --dev     iteration run: prints the results table, saves nothing
 #   --no-run  do not run Maven; summarize the existing target/surefire-reports
 #             (for runs made from IntelliJ's Maven panel)
 #
@@ -22,12 +22,14 @@ readonly MAVEN_IMAGE="maven:3.9-eclipse-temurin-17"
 
 usage() { sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2; }
 
-[[ $# -ge 2 ]] || usage
-suite="$1"; fase="$2"; shift 2
+[[ $# -ge 1 ]] || usage
+suite="$1"; shift
+dev="false"
 run_maven="true"
 extra_args=()
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --dev) dev="true"; shift ;;
         --no-run) run_maven="false"; shift ;;
         --) shift; extra_args=("$@"); break ;;
         *) usage ;;
@@ -35,7 +37,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "$suite" in unit|integration|mock|concurrency|all) ;; *) echo "Suite desconocida: $suite" >&2; usage ;; esac
-case "$fase" in rojo|verde|dev) ;; *) echo "Fase desconocida: $fase" >&2; usage ;; esac
 [[ -f pom.xml ]] || { echo "Ejecutar desde la raíz del proyecto (donde está pom.xml)" >&2; exit 2; }
 
 mvn_args=(-B -Dmaven.test.failure.ignore=true)
@@ -71,11 +72,11 @@ EOF
 }
 
 if [[ "$run_maven" == "true" ]]; then
-    if [[ "$fase" == "dev" ]]; then
+    if [[ "$dev" == "true" ]]; then
         run_mvn || { [[ $? -eq 3 ]] && exit 3; }
     else
         mkdir -p "$RESULTS_DIR"
-        run_mvn 2>&1 | tee "$RESULTS_DIR/$suite-$fase.log"
+        run_mvn 2>&1 | tee "$RESULTS_DIR/$suite.log"
         [[ ${PIPESTATUS[0]} -eq 3 ]] && exit 3
     fi
 fi
@@ -85,12 +86,12 @@ if ! compgen -G "$REPORTS_DIR/TEST-*.xml" >/dev/null; then
     exit 1
 fi
 
-summary_args=(--reports "$REPORTS_DIR" --suite "$suite" --fase "$fase")
-if [[ "$fase" == "dev" ]]; then
+summary_args=(--reports "$REPORTS_DIR" --suite "$suite")
+if [[ "$dev" == "true" ]]; then
     python3 -I "$SKILL_DIR/scripts/surefire_summary.py" "${summary_args[@]}"
     exit $?
 fi
 
-summary="$RESULTS_DIR/$suite-$fase.md"
+summary="$RESULTS_DIR/$suite.md"
 python3 -I "$SKILL_DIR/scripts/surefire_summary.py" "${summary_args[@]}" --out "$summary" || exit 1
-echo "Captura requerida: docs/informe/capturas/$suite-$fase.png (la toma el equipo desde el IDE)" >&2
+echo "Captura requerida: docs/informe/capturas/$suite.png (la toma el equipo desde el IDE)" >&2

@@ -2,12 +2,12 @@
 """Summarizes Surefire XML reports into the Markdown results table used by the informe.
 
 Usage:
-    surefire_summary.py --suite unit --fase rojo [--reports target/surefire-reports] [--out FILE.md]
+    surefire_summary.py --suite unit [--reports target/surefire-reports] [--out FILE.md]
 
 The case ID (CU3, CI12, CM4, CC7) is taken from the test name: either the method prefix
 (`cu3_...`) or anywhere in a display name ("CU3 – ..."). The header records the date and the
-commit, and whether production code (src/main) had uncommitted changes, so a red run on seeded
-or half-fixed code can't pass as the original code.
+commit, and whether production code (src/main) had uncommitted changes, so a run on seeded or
+half-fixed code can't pass as the code in the repository.
 """
 import argparse
 import datetime
@@ -111,9 +111,9 @@ def read_cases(reports: pathlib.Path) -> list:
     return sorted(cases, key=natural_key)
 
 
-def to_markdown(cases: list, suite: str, fase: str) -> str:
+def to_markdown(cases: list, suite: str) -> str:
     counts = {status: sum(1 for c in cases if c["status"] == status) for status in ICONS}
-    title = SUITE_TITLES.get(suite, suite) + (f" ({fase})" if fase != "dev" else "")
+    title = SUITE_TITLES.get(suite, suite)
     lines = [
         f"# Resultados: {title}",
         "",
@@ -134,7 +134,6 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--reports", default="target/surefire-reports")
     parser.add_argument("--suite", required=True)
-    parser.add_argument("--fase", required=True)
     parser.add_argument("--out")
     args = parser.parse_args()
 
@@ -144,7 +143,7 @@ def main() -> int:
         print(f"No hay reportes TEST-*.xml en {reports}", file=sys.stderr)
         return 1
 
-    markdown = to_markdown(cases, args.suite, args.fase)
+    markdown = to_markdown(cases, args.suite)
     if args.out:
         out = pathlib.Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)

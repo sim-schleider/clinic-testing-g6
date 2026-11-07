@@ -171,7 +171,7 @@ Run them like this:
 
 ```bash
 docker compose stop mysql
-.skills/test-report/scripts/run_tests.sh integration dev -- -Dbd.caida=true -Dtest=BaseDeDatosSinServidorIntegrationTest
+.skills/test-report/scripts/run_tests.sh integration --dev -- -Dbd.caida=true -Dtest=BaseDeDatosSinServidorIntegrationTest
 docker compose start mysql
 ```
 

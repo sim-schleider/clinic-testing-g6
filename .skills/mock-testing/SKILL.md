@@ -9,7 +9,7 @@ This skill produces:
 - the real-versus-mock design,
 - the case table,
 - JUnit 5 + Mockito 5 tests,
-- red/green results, the defects found and the seeded faults,
+- the results of the run, the defects found and the seeded faults,
 - the report section `docs/informe/secciones/05-mocks.md`, written in Spanish.
 
 The project conventions are in `.skills/CONVENTIONS.md`.
@@ -118,8 +118,8 @@ Read `references/mockito5-patterns.md`.
 ### 4. Run
 
 ```bash
-.skills/test-report/scripts/run_tests.sh mock dev
-.skills/test-report/scripts/run_tests.sh mock rojo
+.skills/test-report/scripts/run_tests.sh mock --dev   # while iterating
+.skills/test-report/scripts/run_tests.sh mock         # evidence: one run, saved
 ```
 
 ### 5. Analyze every red
@@ -133,11 +133,11 @@ A red in Group B (the state) next to a green in Group A (`Ambulancia`) locates t
 state, and vice versa. Say so in the analysis, because it's the argument for why mocks were
 worth using.
 
-Propose fixes; apply them only with the user's OK, one commit each. Then run `verde`.
+Propose fixes; apply them only with the user's OK, one commit each.
 
 ### 6. Seed faults (after green)
 
-One at a time, run `mock dev`, record, then restore with `git checkout`. Good faults here:
+One at a time, run `mock --dev`, record, then restore with `git checkout`. Good faults here:
 
 - `Ambulancia` delegates the wrong event (`SolicitudDeTraslado` inside `atenderDomicilio`);
 - it forgets `setOcupado(true)`;
@@ -150,7 +150,7 @@ Record them in "Fallas sembradas" with IDs `FM1…`.
 
 ### 7. Results and conclusions
 
-"Resultados" gives the counts for red and green and a pointer to the appendix. "Conclusiones"
+"Resultados" gives how many tests pass and how many fail, and a pointer to the appendix. "Conclusiones"
 covers:
 - what isolation with mocks made visible, such as which defects are in `Ambulancia` and which
   are in the states;
